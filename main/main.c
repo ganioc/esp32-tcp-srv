@@ -12,9 +12,13 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 
+#include "gpio.h"
+
 void app_main()
 {
     printf("Hello world!\n");
+
+    print_gpio();
 
     /* Print chip information */
     esp_chip_info_t chip_info;
@@ -29,12 +33,13 @@ void app_main()
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
+    // I can use this for LED status shining
     while (true)
     {
-        printf("Restarting in 1 seconds...\n");
+        printf(".\n");
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
+    // printf("Restarting now.\n");
+    // fflush(stdout);
+    // esp_restart();
 }
