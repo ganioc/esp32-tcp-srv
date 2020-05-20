@@ -33,10 +33,24 @@ void app_main()
     printf("\nConfig GPIO");
     conf_gpio();
 
+    // turn on ultra sonic hub power
+    printf("\nTurn on ultra-sonic hub\n");
+    on_ut_pwr();
+
     // I can use this for LED status shining
+    int cnt = 0;
     while (1)
     {
-        printf(".\n");
+        printf(". %d\n", cnt++);
+        if (cnt % 2 == 1)
+        {
+            on_led_link();
+        }
+        else
+        {
+            off_led_link();
+        }
+
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     // printf("Restarting now.\n");

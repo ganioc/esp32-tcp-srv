@@ -22,6 +22,12 @@ extern "C"
 
   void print_gpio();
   void conf_gpio();
+  void on_led_link();
+  void off_led_link();
+  void on_led_stat();
+  void off_led_stat();
+  void on_ut_pwr();
+  void off_ut_pwr();
 
 #ifdef __cplusplus
 }
