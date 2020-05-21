@@ -20,8 +20,10 @@ static const char *TAG = "TCP server";
 static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
-  int sock;
+  int sock = *((int *)pvParameters);
   int len;
+
+  ESP_LOGI(TAG, "Connection opened");
 
   while (1)
   {
@@ -117,13 +119,20 @@ static void tcp_server_task(void *pvParameters)
 
     struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
     uint addr_len = sizeof(source_addr);
-    int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-    if (sock < 0)
+    int sock;
+
+    while (1)
     {
-      ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
-      break;
+      sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+      if (sock < 0)
+      {
+        ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
+        break;
+      }
+      ESP_LOGI(TAG, "Socket accepted");
+      // To start a new task here
+      xTaskCreate(socket_task, "conn", 4096, &sock, 6, NULL);
     }
-    ESP_LOGI(TAG, "Socket accepted");
 
     // To start a new task here
 
