@@ -13,7 +13,7 @@
 
 #include "../components/gpio/include/gpio.h"
 #include "../components/wifi/include/wifi.h"
-#include "../components/server/include/server.h"
+#include "../components/wifi/include/server.h"
 
 void app_main()
 {
