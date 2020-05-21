@@ -10,19 +10,26 @@ uint8_t datausart[BUF_SIZE];
 
 static void usart_task()
 {
-
+  int len = 0;
+  int i = 0;
   while (1)
   {
-    int len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 100 / portTICK_RATE_MS);
+    len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 150 / portTICK_RATE_MS);
 
     if (len > 0)
     {
       printf("Usart rx %d\n", len);
+      for (i = 0; i < len; i++)
+      {
+        printf("0x%2x  ", datausart[i]);
+      }
+      printf("\n");
     }
     else
     {
       printf("Usart rx non\n");
     }
+    // vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
 }
@@ -43,5 +50,5 @@ void init_usart()
   uart_set_pin(UART_NUM_1, UT_TXD, UT_RXD, -1, -1);
   uart_driver_install(UART_NUM_1, BUF_SIZE * 2, 0, 0, NULL, 0);
 
-  xTaskCreate(usart_task, "usart_task", 1024, NULL, 4, NULL);
+  xTaskCreate(usart_task, "usart_task", 2048, NULL, 4, NULL);
 }
