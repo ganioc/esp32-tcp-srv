@@ -54,7 +54,7 @@ static void tcp_server_task(void *pvParameters)
     }
     ESP_LOGI(TAG, "Socket bound, port %d", SERVER_PORT);
 
-    err = listen(listen_sock, 1);
+    err = listen(listen_sock, 2);
     if (err != 0)
     {
       ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
@@ -73,7 +73,6 @@ static void tcp_server_task(void *pvParameters)
     ESP_LOGI(TAG, "Socket accepted");
 
     // To start a new task here
-    
 
     while (1)
     {
