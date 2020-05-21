@@ -37,10 +37,6 @@ void app_main()
     printf("\nConfig GPIO");
     conf_gpio();
 
-    // turn on ultra sonic hub power
-    printf("\nTurn on ultra-sonic hub\n");
-    on_ut_pwr();
-
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -59,7 +55,12 @@ void app_main()
     init_server();
 
     // turn on uart task
+    printf("\ninit usart\n");
     init_usart();
+
+    // turn on ultra sonic hub power
+    printf("\nTurn on ultra-sonic hub\n");
+    on_ut_pwr();
 
     // I can use this for LED status shining
     int cnt = 0;
