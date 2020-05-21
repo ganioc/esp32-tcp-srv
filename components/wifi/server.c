@@ -21,6 +21,7 @@ static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
   int sock;
+
   while (1)
   {
     int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
@@ -61,6 +62,7 @@ static void socket_task(void *pvParameters)
       }
     }
   }
+  vTaskDelete(NULL);
 }
 
 static void tcp_server_task(void *pvParameters)
