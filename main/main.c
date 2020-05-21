@@ -14,7 +14,7 @@
 #include "../components/gpio/include/gpio.h"
 #include "../components/wifi/include/wifi.h"
 #include "../components/wifi/include/server.h"
-// #include "../components/uart/include/uart.h"
+#include "../components/usart/include/usart.h"
 
 void app_main()
 {
@@ -59,6 +59,7 @@ void app_main()
     init_server();
 
     // turn on uart task
+    init_usart();
 
     // I can use this for LED status shining
     int cnt = 0;
