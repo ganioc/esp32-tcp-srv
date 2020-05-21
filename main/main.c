@@ -13,6 +13,7 @@
 
 #include "../components/gpio/include/gpio.h"
 #include "../components/wifi/include/wifi.h"
+#include "../components/server/include/server.h"
 
 void app_main()
 {
@@ -51,6 +52,9 @@ void app_main()
     // turn on Wifi
     printf("\nTurn on wifi softap\n");
     init_softap();
+
+    printf("\nTurn on tcp server\n");
+    init_server();
 
     // I can use this for LED status shining
     int cnt = 0;
