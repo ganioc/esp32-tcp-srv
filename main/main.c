@@ -9,8 +9,10 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
+#include "nvs_flash.h"
 
 #include "../components/gpio/include/gpio.h"
+#include "../components/wifi/include/wifi.h"
 
 void app_main()
 {
@@ -36,6 +38,19 @@ void app_main()
     // turn on ultra sonic hub power
     printf("\nTurn on ultra-sonic hub\n");
     on_ut_pwr();
+
+    //Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    // turn on Wifi
+    printf("\nTurn on wifi softap\n");
+    init_softap();
 
     // I can use this for LED status shining
     int cnt = 0;
