@@ -20,6 +20,47 @@ static const char *TAG = "TCP server";
 static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
+  int sock;
+  while (1)
+  {
+    int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+    // Error occurred during receiving
+    if (len < 0)
+    {
+      ESP_LOGE(TAG, "recv failed: errno %d", errno);
+      break;
+    }
+    // Connection closed
+    else if (len == 0)
+    {
+      ESP_LOGI(TAG, "Connection closed");
+      break;
+    }
+    // Data received
+    else
+    {
+      // Get the sender's ip address as string
+      // if (source_addr.sin6_family == PF_INET)
+      // {
+      //   inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
+      // }
+      // else if (source_addr.sin6_family == PF_INET6)
+      // {
+      //   inet6_ntoa_r(source_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
+      // }
+
+      rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
+      ESP_LOGI(TAG, "Received %d bytes from :", len);
+      ESP_LOGI(TAG, "%s", rx_buffer);
+
+      int err = send(sock, rx_buffer, len, 0);
+      if (err < 0)
+      {
+        ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+        break;
+      }
+    }
+  }
 }
 
 static void tcp_server_task(void *pvParameters)
@@ -76,47 +117,6 @@ static void tcp_server_task(void *pvParameters)
     ESP_LOGI(TAG, "Socket accepted");
 
     // To start a new task here
-
-    while (1)
-    {
-      int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-      // Error occurred during receiving
-      if (len < 0)
-      {
-        ESP_LOGE(TAG, "recv failed: errno %d", errno);
-        break;
-      }
-      // Connection closed
-      else if (len == 0)
-      {
-        ESP_LOGI(TAG, "Connection closed");
-        break;
-      }
-      // Data received
-      else
-      {
-        // Get the sender's ip address as string
-        if (source_addr.sin6_family == PF_INET)
-        {
-          inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
-        }
-        else if (source_addr.sin6_family == PF_INET6)
-        {
-          inet6_ntoa_r(source_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
-        }
-
-        rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-        ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-        ESP_LOGI(TAG, "%s", rx_buffer);
-
-        int err = send(sock, rx_buffer, len, 0);
-        if (err < 0)
-        {
-          ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-          break;
-        }
-      }
-    }
 
     if (sock != -1)
     {
