@@ -65,6 +65,8 @@ static void socket_task(void *pvParameters)
       }
     }
   }
+  // Dont need to close sock, when len == 0?
+  // socket is closed?
   if (len != 0)
   {
     ESP_LOGE(TAG, "Shutting down conn...");
