@@ -21,10 +21,11 @@ static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
   int sock;
+  int len;
 
   while (1)
   {
-    int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+    len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
     // Error occurred during receiving
     if (len < 0)
     {
@@ -62,12 +63,18 @@ static void socket_task(void *pvParameters)
       }
     }
   }
+  if (len != 0)
+  {
+    ESP_LOGE(TAG, "Shutting down conn...");
+    shutdown(sock, 0);
+    close(sock);
+  }
   vTaskDelete(NULL);
 }
 
 static void tcp_server_task(void *pvParameters)
 {
-  char rx_buffer[256];
+  // char rx_buffer[256];
   char addr_str[128];
   int addr_family;
   int ip_protocol;
