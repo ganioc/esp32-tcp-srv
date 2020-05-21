@@ -37,6 +37,7 @@ void init_usart()
       .parity = UART_PARITY_DISABLE,
       .stop_bits = UART_STOP_BITS_1,
       .flow_ctrl = UART_HW_FLOWCTRL_DISABLE};
+
   uart_param_config(UART_NUM_1, &uart_config);
 
   uart_set_pin(UART_NUM_1, UT_TXD, UT_RXD, -1, -1);
