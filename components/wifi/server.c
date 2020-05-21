@@ -37,15 +37,6 @@ static void tcp_server_task(void *pvParameters)
     addr_family = AF_INET;
     ip_protocol = IPPROTO_IP;
     inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
-    // #else // IPV6
-    //     struct sockaddr_in6 dest_addr;
-    //     bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
-    //     dest_addr.sin6_family = AF_INET6;
-    //     dest_addr.sin6_port = htons(PORT);
-    //     addr_family = AF_INET6;
-    //     ip_protocol = IPPROTO_IPV6;
-    //     inet6_ntoa_r(dest_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
-    // #endif
 
     int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
     if (listen_sock < 0)
@@ -80,6 +71,9 @@ static void tcp_server_task(void *pvParameters)
       break;
     }
     ESP_LOGI(TAG, "Socket accepted");
+
+    // To start a new task here
+    
 
     while (1)
     {
