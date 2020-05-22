@@ -29,6 +29,7 @@ static void socket_task(void *pvParameters)
   char rx_buffer[256];
   int sock = *((int *)pvParameters);
   int len = 0;
+  Msg_t msg;
   QueueHandle_t rx_queue; // from tcp to uart_task
   QueueHandle_t tx_queue;
   rx_queue = create_queue();
@@ -48,8 +49,9 @@ static void socket_task(void *pvParameters)
     };
     FD_ZERO(&rfds);
     FD_SET(sock, &rfds);
-
-    // receive from
+    /////////////////////////
+    // receive from  socket
+    /////////////////////////
     s = select(sock + 1, &rfds, NULL, NULL, &tv);
     // len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
     // Error occurred during receiving
@@ -66,17 +68,6 @@ static void socket_task(void *pvParameters)
     // Data received
     else
     {
-      // Get the sender's ip address as string
-      // if (source_addr.sin6_family == PF_INET)
-      // {
-      //   inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
-      // }
-      // else if (source_addr.sin6_family == PF_INET6)
-      // {
-      //   inet6_ntoa_r(source_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
-      // }
-
-      // rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
       if (FD_ISSET(sock, &rfds))
       {
         len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
@@ -103,6 +94,13 @@ static void socket_task(void *pvParameters)
           }
         }
       }
+    }
+    /////////////////////////
+    // receive from tx_queue
+    /////////////////////////
+    if (xQueueReceive(tx_queue, &msg, 150 / portTICK_RATE_MS))
+    {
+      printf("msg %d\n", msg.len);
     }
   }
   // Dont need to close sock, when len == 0?

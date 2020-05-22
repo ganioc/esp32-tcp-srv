@@ -5,8 +5,13 @@
 #include "driver/gpio.h"
 
 #include "./include/usart.h"
+#include "../queue/include/queue.h"
+
+extern QueueManager_t *xManager;
+extern SemaphoreHandle_t xSemaphore;
 
 uint8_t datausart[BUF_SIZE];
+Msg_t msg;
 
 struct GlobalStatus
 {
@@ -47,6 +52,40 @@ static void usart_task()
       printf("Usart rx non\n");
     }
     // vTaskDelay(1000 / portTICK_PERIOD_MS);
+    ////////////////////////
+    // to check rx queue
+    //
+    if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
+    {
+      for (i = 0; i < QUEUE_LENGTH; i++)
+      {
+        if (xManager[i].flag == 1)
+        {
+          if (xQueueReceive(xManager[i].rx_queue, &msg, 50 / portTICK_RATE_MS))
+          {
+            printf("msg %d\n", msg.len);
+          }
+        }
+      }
+      xSemaphoreGive(xSemaphore);
+    }
+    ///////////////////////////
+    // send sth. out to tx queue
+    //
+    if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
+    {
+      for (i = 0; i < QUEUE_LENGTH; i++)
+      {
+        if (xManager[i].flag == 1)
+        {
+          if (xQueueSend(xManager[i].tx_queue, &msg, 50 / portTICK_RATE_MS))
+          {
+            printf("msg send\n");
+          }
+        }
+      }
+      xSemaphoreGive(xSemaphore);
+    }
   }
   vTaskDelete(NULL);
 }

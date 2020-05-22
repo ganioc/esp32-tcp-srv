@@ -22,8 +22,10 @@ typedef struct QueueManager
 
 typedef struct Msg
 {
+  int len;
   char buf[MSG_LEN];
 } Msg_t;
+
 
 void init_queue();
 QueueHandle_t create_queue();
