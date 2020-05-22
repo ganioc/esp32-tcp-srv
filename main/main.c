@@ -52,8 +52,8 @@ void app_main()
     ESP_ERROR_CHECK(ret);
 
     // turn on Wifi
-    printf("\nTurn on wifi softap\n");
-    init_softap();
+    printf("\nTurn on wifi station\n");
+    init_sta();
 
     // tcp server on
     printf("\nTurn on tcp server\n");

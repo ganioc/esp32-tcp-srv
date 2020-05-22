@@ -63,7 +63,6 @@ void check_rx_queues()
  */
 static void ctrl_task()
 {
-  Msg_t msg;
 
   while (1)
   {
