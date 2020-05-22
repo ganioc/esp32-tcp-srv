@@ -15,6 +15,7 @@
 #include "../components/wifi/include/wifi.h"
 #include "../components/wifi/include/server.h"
 #include "../components/usart/include/usart.h"
+#include "../components/queue/include/queue.h"
 
 void app_main()
 {
@@ -32,6 +33,9 @@ void app_main()
 
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+    // init queue
+    printf("\nConfig queue\n");
+    init_queue();
 
     // Configuration
     printf("\nConfig GPIO");
