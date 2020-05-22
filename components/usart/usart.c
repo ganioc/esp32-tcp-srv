@@ -8,6 +8,19 @@
 
 uint8_t datausart[BUF_SIZE];
 
+struct GlobalStatus
+{
+  int flag;
+} status = {
+    .flag = 0};
+
+void broadcast()
+{
+}
+void check_rx_queues()
+{
+}
+
 /**
  * How can we know the xQueues from the conn_task? 
  * 

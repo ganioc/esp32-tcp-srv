@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include "./include/queue.h"
 
-static QueueManager_t xManager[QUEUE_LENGTH];
-static SemaphoreHandle_t xSemaphore = NULL;
+QueueManager_t xManager[QUEUE_LENGTH];
+SemaphoreHandle_t xSemaphore = NULL;
 StaticSemaphore_t xSemaphoreBuffer;
 
 void init_queue()
 {
   xSemaphore = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
 }
-
-int add_queue(int sock)
+QueueHandle_t create_queue()
+{
+  return xQueueCreate(MAX_MSG_NUM, sizeof(Msg_t));
+}
+int add_queue(int sock, QueueHandle_t rx, QueueHandle_t tx)
 {
   int i = 0;
   if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
@@ -20,8 +23,9 @@ int add_queue(int sock)
       if (xManager[i].flag == 0)
       {
         xManager[i].sock_num = sock;
-        xManager[i].rx_queue = xQueueCreate(MAX_MSG_NUM, sizeof(Msg_t));
-        xManager[i].tx_queue = xQueueCreate(MAX_MSG_NUM, sizeof(Msg_t));
+        xManager[i].rx_queue = rx;
+        // xQueueCreate(MAX_MSG_NUM, sizeof(Msg_t));
+        xManager[i].tx_queue = tx;
         xManager[i].flag = 1;
       }
     }
@@ -40,8 +44,8 @@ int remove_queue(int sock)
       if (xManager[i].flag == 1 && xManager[i].sock_num == sock)
       {
         xManager[i].sock_num = 0;
-        vQueueDelete(xManager[i].rx_queue);
-        vQueueDelete(xManager[i].tx_queue);
+        // vQueueDelete(xManager[i].rx_queue);
+        // vQueueDelete(xManager[i].tx_queue);
         xManager[i].flag = 0;
       }
     }
@@ -50,3 +54,8 @@ int remove_queue(int sock)
   }
   return -1;
 }
+
+/**
+ * It must ensure : rx, tx_queue exists
+ * When uart_task is checking the packet;
+ */

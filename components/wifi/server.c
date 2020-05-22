@@ -1,5 +1,10 @@
 #include <string.h>
 #include <sys/param.h>
+#include <sys/fcntl.h>
+#include <sys/errno.h>
+#include <sys/unistd.h>
+#include <sys/select.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -12,8 +17,10 @@
 #include "lwip/sockets.h"
 #include "lwip/sys.h"
 #include "lwip/netdb.h"
+#include "freertos/queue.h"
 
 #include "include/server.h"
+#include "../queue/include/queue.h"
 
 static const char *TAG = "TCP server";
 
@@ -22,23 +29,39 @@ static void socket_task(void *pvParameters)
   char rx_buffer[256];
   int sock = *((int *)pvParameters);
   int len;
+  QueueHandle_t rx_queue; // from tcp to uart_task
+  QueueHandle_t tx_queue;
+  rx_queue = create_queue();
+  tx_queue = create_queue();
+
+  add_queue(sock, rx_queue, tx_queue);
 
   ESP_LOGI(TAG, "Connection opened");
 
   while (1)
   {
-    len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+    int s;
+    fd_set rfds;
+    struct timeval tv = {
+        .tv_sec = 0,
+        .tv_usec = 200000,
+    };
+    FD_ZERO(&rfds);
+    FD_SET(sock, &rfds);
+
+    s = select(sock + 1, &rfds, NULL, NULL, &tv);
+
+    // len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
     // Error occurred during receiving
-    if (len < 0)
+    if (s < 0)
     {
       ESP_LOGE(TAG, "recv failed: errno %d", errno);
       break;
     }
     // Connection closed
-    else if (len == 0)
+    else if (s == 0)
     {
-      ESP_LOGI(TAG, "Connection closed");
-      break;
+      ESP_LOGI(TAG, "recv timeout");
     }
     // Data received
     else
@@ -53,26 +76,41 @@ static void socket_task(void *pvParameters)
       //   inet6_ntoa_r(source_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
       // }
 
-      rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-      ESP_LOGI(TAG, "Received %d bytes from :", len);
-      ESP_LOGI(TAG, "%s", rx_buffer);
-
-      int err = send(sock, rx_buffer, len, 0);
-      if (err < 0)
+      // rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
+      if (FD_ISSET(sock, &rfds))
       {
-        ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-        break;
+        len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+        if (len < 0)
+        {
+          ESP_LOGE(TAG, "recv failed: errno %d", errno);
+          break;
+        }
+        else
+        {
+          ESP_LOGI(TAG, "Received %d bytes from :", len);
+          // ESP_LOGI(TAG, "%s", rx_buffer);
+          rx_buffer[len] = 0;
+          int err = send(sock, rx_buffer, len, 0);
+          if (err < 0)
+          {
+            ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+            break;
+          }
+        }
       }
     }
   }
   // Dont need to close sock, when len == 0?
   // socket is closed?
-  if (len != 0)
-  {
-    ESP_LOGE(TAG, "Shutting down conn...");
-    shutdown(sock, 0);
-    close(sock);
-  }
+  remove_queue(sock);
+
+  // if (len != 0)
+  // {
+  ESP_LOGE(TAG, "Shutting down conn...");
+  shutdown(sock, 0);
+  close(sock);
+  // }
+
   vTaskDelete(NULL);
 }
 
