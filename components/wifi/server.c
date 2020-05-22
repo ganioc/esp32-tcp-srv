@@ -32,12 +32,14 @@ static void socket_task(void *pvParameters)
   Msg_t msg;
   QueueHandle_t rx_queue; // from tcp to uart_task
   QueueHandle_t tx_queue;
-  rx_queue = create_queue();
-  tx_queue = create_queue();
+  // rx_queue = create_queue();
+  // tx_queue = create_queue();
 
-  add_queue(sock, rx_queue, tx_queue);
+  add_queue(sock);
+  rx_queue = get_rx_queue(sock);
+  tx_queue = get_tx_queue(sock);
 
-  ESP_LOGI(TAG, "Connection opened");
+  ESP_LOGI(TAG, "Connection opened, sock=%d", sock);
 
   while (1)
   {
@@ -63,7 +65,7 @@ static void socket_task(void *pvParameters)
     // Connection closed
     else if (s == 0)
     {
-      ESP_LOGI(TAG, "recv timeout");
+      // ESP_LOGI(TAG, "recv timeout");
     }
     // Data received
     else
@@ -83,9 +85,17 @@ static void socket_task(void *pvParameters)
         }
         else
         {
-          ESP_LOGI(TAG, "Received %d bytes from :", len);
+          ESP_LOGI(TAG, "Received %d bytes", len);
           // ESP_LOGI(TAG, "%s", rx_buffer);
           rx_buffer[len] = 0;
+          msg.len = len;
+          for (int j = 0; j < len; j++)
+          {
+            msg.buf[j] = rx_buffer[j];
+          }
+
+          xQueueSend(rx_queue, &msg, portMAX_DELAY);
+
           int err = send(sock, rx_buffer, len, 0);
           if (err < 0)
           {
@@ -98,10 +108,10 @@ static void socket_task(void *pvParameters)
     /////////////////////////
     // receive from tx_queue
     /////////////////////////
-    if (xQueueReceive(tx_queue, &msg, 150 / portTICK_RATE_MS))
+    /*   if (xQueueReceive(tx_queue, &msg, 150 / portTICK_RATE_MS))
     {
       printf("msg %d\n", msg.len);
-    }
+    } */
   }
   // Dont need to close sock, when len == 0?
   // socket is closed?

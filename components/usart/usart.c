@@ -7,7 +7,7 @@
 #include "./include/usart.h"
 #include "../queue/include/queue.h"
 
-extern QueueManager_t *xManager;
+extern QueueManager_t xManager[];
 extern SemaphoreHandle_t xSemaphore;
 
 uint8_t datausart[BUF_SIZE];
@@ -36,7 +36,10 @@ static void usart_task()
   int i = 0;
   while (1)
   {
-    len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 150 / portTICK_RATE_MS);
+
+    /////////////////////////
+    // check uart
+    /*     len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 150 / portTICK_RATE_MS);
 
     if (len > 0)
     {
@@ -50,28 +53,33 @@ static void usart_task()
     else
     {
       printf("Usart rx non\n");
-    }
-    // vTaskDelay(1000 / portTICK_PERIOD_MS);
+    } */
+
     ////////////////////////
     // to check rx queue
     //
+
     if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
     {
+      printf("Check rx queue\n");
       for (i = 0; i < QUEUE_LENGTH; i++)
       {
         if (xManager[i].flag == 1)
         {
-          if (xQueueReceive(xManager[i].rx_queue, &msg, 50 / portTICK_RATE_MS))
+          if (xQueueReceive(xManager[i].rx_queue, &msg, 200 / portTICK_RATE_MS))
           {
-            printf("msg %d\n", msg.len);
+            printf("-> %d rx msg %d\n", i, msg.len);
           }
         }
       }
       xSemaphoreGive(xSemaphore);
+      vTaskDelay(500 / portTICK_RATE_MS);
     }
+
     ///////////////////////////
     // send sth. out to tx queue
     //
+    /*
     if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
     {
       for (i = 0; i < QUEUE_LENGTH; i++)
@@ -86,6 +94,7 @@ static void usart_task()
       }
       xSemaphoreGive(xSemaphore);
     }
+    */
   }
   vTaskDelete(NULL);
 }

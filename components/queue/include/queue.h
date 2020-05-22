@@ -26,8 +26,9 @@ typedef struct Msg
   char buf[MSG_LEN];
 } Msg_t;
 
-
 void init_queue();
 QueueHandle_t create_queue();
-int add_queue(int sock, QueueHandle_t rx, QueueHandle_t tx);
+int add_queue(int sock);
 int remove_queue(int sock);
+QueueHandle_t get_rx_queue(int sock);
+QueueHandle_t get_tx_queue(int sock);
