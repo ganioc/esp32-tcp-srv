@@ -8,9 +8,12 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 
-#include "./include/usart.h"
 #include "../queue/include/queue.h"
 #include "../ctrltask/include/ctrltask.h"
+#include "../encode/include/encode.h"
+#include "../util/include/util.h"
+
+#include "./include/usart.h"
 
 extern QueueHandle_t uartQueue;
 extern GlobalStatus_t gStatus;
@@ -42,8 +45,6 @@ static int is_valid(int counter, int mode)
 // check uart
 static void usart_task()
 {
-  struct timeval tv;
-  int64_t intTime;
 
   while (1)
   {
@@ -60,8 +61,7 @@ static void usart_task()
       }
       printf("\n");
 
-      gettimeofday(&tv, NULL);
-      intTime = ((int64_t)tv.tv_sec) * 1000LL + ((int64_t)tv.tv_usec) / 1000LL;
+      int64_t iTime = getstamp64();
 
       // 0xcb  0x55  0x4
       if (datausart[0] == 0xcb && datausart[1] == 0x55 && datausart[2] == 0x4)
@@ -70,6 +70,7 @@ static void usart_task()
         if (gStatus.enable == 1 && is_valid(counter, gStatus.mode) == 0)
         {
           // create notification msg
+          //encodeSensorNotification(&msg, (char *)&datausart[3], intTime);
 
           if (xQueueSend(uartQueue, &msg, 100 / portTICK_RATE_MS))
           {
