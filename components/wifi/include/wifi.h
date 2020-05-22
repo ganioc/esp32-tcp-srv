@@ -14,5 +14,5 @@
 
 // Prototypes
 // wifi init
-void init_softap();
+// void init_softap();
 void init_sta();
