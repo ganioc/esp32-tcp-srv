@@ -10,6 +10,8 @@
 #define EXAMPLE_MAX_STA_CONN 3
 #define EXAMPLE_ESP_MAXIMUM_RETRY 5
 
+#define EXAMPLE_STATIC_IP "192.168.32.101"
+
 // Prototypes
 // wifi init
 void init_softap();
