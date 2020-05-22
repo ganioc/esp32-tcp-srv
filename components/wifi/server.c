@@ -28,7 +28,7 @@ static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
   int sock = *((int *)pvParameters);
-  int len;
+  int len = 0;
   QueueHandle_t rx_queue; // from tcp to uart_task
   QueueHandle_t tx_queue;
   rx_queue = create_queue();
@@ -49,8 +49,8 @@ static void socket_task(void *pvParameters)
     FD_ZERO(&rfds);
     FD_SET(sock, &rfds);
 
+    // receive from
     s = select(sock + 1, &rfds, NULL, NULL, &tv);
-
     // len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
     // Error occurred during receiving
     if (s < 0)
@@ -83,6 +83,11 @@ static void socket_task(void *pvParameters)
         if (len < 0)
         {
           ESP_LOGE(TAG, "recv failed: errno %d", errno);
+          break;
+        }
+        else if (len == 0)
+        {
+          ESP_LOGE(TAG, "recv failed: 0 len ");
           break;
         }
         else

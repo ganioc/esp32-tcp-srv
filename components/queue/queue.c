@@ -5,9 +5,12 @@ QueueManager_t xManager[QUEUE_LENGTH];
 SemaphoreHandle_t xSemaphore = NULL;
 StaticSemaphore_t xSemaphoreBuffer;
 
+static char *TAG = "queue.c";
+
 void init_queue()
 {
   xSemaphore = xSemaphoreCreateBinaryStatic(&xSemaphoreBuffer);
+  xSemaphoreGive(xSemaphore);
 }
 QueueHandle_t create_queue()
 {
@@ -15,9 +18,11 @@ QueueHandle_t create_queue()
 }
 int add_queue(int sock, QueueHandle_t rx, QueueHandle_t tx)
 {
+  ESP_LOGI(TAG, "add_queue");
   int i = 0;
   if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
   {
+    ESP_LOGI(TAG, "xSemaphoreTake pdTRUE");
     for (i = 0; i < QUEUE_LENGTH; i++)
     {
       if (xManager[i].flag == 0)
