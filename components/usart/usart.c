@@ -10,7 +10,6 @@
 
 #include "../queue/include/queue.h"
 #include "../ctrltask/include/ctrltask.h"
-// #include "../encode/include/encode.h"
 #include "../util/include/util.h"
 
 #include "./include/usart.h"

@@ -19,9 +19,9 @@ GlobalStatus_t gStatus = {
 // mode=1, Send every packet
 // mode=2,  Send every other packet
 
-static Msg_t msg;
+Msg_t msg;
 
-void broadcast()
+void broadcast(Msg_t *mMsg)
 {
   if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
   {
@@ -29,7 +29,7 @@ void broadcast()
     {
       if (xManager[i].flag == 1)
       {
-        if (xQueueSend(xManager[i].tx_queue, &msg, 50 / portTICK_RATE_MS))
+        if (xQueueSend(xManager[i].tx_queue, mMsg, 50 / portTICK_RATE_MS))
         {
           printf("msg send\n");
         }
@@ -74,15 +74,13 @@ static void ctrl_task()
     if (xQueueReceive(uartQueue, &msg, 200 / portTICK_RATE_MS))
     {
       printf("-> rx msg %d\n", msg.len);
-      if (gStatus.enable == 1)
-      {
-        // send out uart data
-        ///////////////////////////
-        // send sth. out to tx queue
-        // broadcast();
 
-        // send out switch data
-      }
+      // send out uart data
+      ///////////////////////////
+      // send sth. out to tx queue
+      broadcast(&msg);
+
+      // send out switch data
     }
   }
 }

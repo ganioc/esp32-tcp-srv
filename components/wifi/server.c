@@ -23,13 +23,14 @@
 #include "../queue/include/queue.h"
 
 static const char *TAG = "TCP server";
+static Msg_t msg;
 
 static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
   int sock = *((int *)pvParameters);
   int len = 0;
-  Msg_t msg;
+
   QueueHandle_t rx_queue; // from tcp to uart_task
   QueueHandle_t tx_queue;
 
@@ -108,7 +109,7 @@ static void socket_task(void *pvParameters)
     /////////////////////////
     if (xQueueReceive(tx_queue, &msg, 100 / portTICK_RATE_MS))
     {
-      printf("msg %d\n", msg.len);
+      printf("<-- msg %d\n", msg.len);
     }
   }
   // Dont need to close sock, when len == 0?
