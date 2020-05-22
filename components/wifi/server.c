@@ -78,14 +78,12 @@ static void socket_task(void *pvParameters)
 
 static void tcp_server_task(void *pvParameters)
 {
-  // char rx_buffer[256];
   char addr_str[128];
   int addr_family;
   int ip_protocol;
 
   while (1)
   {
-
     // #ifdef CONFIG_EXAMPLE_IPV4
     struct sockaddr_in dest_addr;
     dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);

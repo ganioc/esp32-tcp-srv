@@ -8,6 +8,10 @@
 
 uint8_t datausart[BUF_SIZE];
 
+/**
+ * How can we know the xQueues from the conn_task? 
+ * 
+ */
 static void usart_task()
 {
   int len = 0;
