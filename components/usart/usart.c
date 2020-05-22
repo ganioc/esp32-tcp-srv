@@ -10,7 +10,7 @@
 
 #include "../queue/include/queue.h"
 #include "../ctrltask/include/ctrltask.h"
-#include "../encode/include/encode.h"
+// #include "../encode/include/encode.h"
 #include "../util/include/util.h"
 
 #include "./include/usart.h"
@@ -70,7 +70,7 @@ static void usart_task()
         if (gStatus.enable == 1 && is_valid(counter, gStatus.mode) == 0)
         {
           // create notification msg
-          //encodeSensorNotification(&msg, (char *)&datausart[3], intTime);
+          encodeSensorN(&msg, (char *)&datausart[3], iTime);
 
           if (xQueueSend(uartQueue, &msg, 100 / portTICK_RATE_MS))
           {
