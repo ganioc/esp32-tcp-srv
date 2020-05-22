@@ -3,5 +3,5 @@
 
 void init_queue()
 {
-  printf("in init queue\n");
+  
 }
