@@ -4,6 +4,7 @@
 QueueManager_t xManager[QUEUE_LENGTH];
 SemaphoreHandle_t xSemaphore = NULL;
 StaticSemaphore_t xSemaphoreBuffer;
+QueueHandle_t uartQueue;
 
 static char *TAG = "queue.c";
 

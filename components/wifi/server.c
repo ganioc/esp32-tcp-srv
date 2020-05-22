@@ -32,8 +32,6 @@ static void socket_task(void *pvParameters)
   Msg_t msg;
   QueueHandle_t rx_queue; // from tcp to uart_task
   QueueHandle_t tx_queue;
-  // rx_queue = create_queue();
-  // tx_queue = create_queue();
 
   add_queue(sock);
   rx_queue = get_rx_queue(sock);
@@ -96,22 +94,22 @@ static void socket_task(void *pvParameters)
 
           xQueueSend(rx_queue, &msg, portMAX_DELAY);
 
-          int err = send(sock, rx_buffer, len, 0);
+          /*          int err = send(sock, rx_buffer, len, 0);
           if (err < 0)
           {
             ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
             break;
-          }
+          } */
         }
       }
     }
     /////////////////////////
     // receive from tx_queue
     /////////////////////////
-    /*   if (xQueueReceive(tx_queue, &msg, 150 / portTICK_RATE_MS))
+    if (xQueueReceive(tx_queue, &msg, 100 / portTICK_RATE_MS))
     {
       printf("msg %d\n", msg.len);
-    } */
+    }
   }
   // Dont need to close sock, when len == 0?
   // socket is closed?

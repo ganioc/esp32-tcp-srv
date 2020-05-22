@@ -16,6 +16,7 @@
 #include "../components/wifi/include/server.h"
 #include "../components/usart/include/usart.h"
 #include "../components/queue/include/queue.h"
+#include "../components/ctrltask/include/ctrltask.h"
 
 void app_main()
 {
@@ -61,6 +62,10 @@ void app_main()
     // turn on uart task
     printf("\ninit usart\n");
     init_usart();
+
+    // turn on ctrl task
+    printf("\n inti ctrltask\n");
+    init_ctrltask();
 
     // turn on ultra sonic hub power
     printf("\nTurn on ultra-sonic hub\n");

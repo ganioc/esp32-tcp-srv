@@ -1,100 +1,83 @@
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
 
 #include "./include/usart.h"
 #include "../queue/include/queue.h"
+#include "../ctrltask/include/ctrltask.h"
 
-extern QueueManager_t xManager[];
-extern SemaphoreHandle_t xSemaphore;
+extern QueueHandle_t uartQueue;
+extern GlobalStatus_t gStatus;
 
 uint8_t datausart[BUF_SIZE];
-Msg_t msg;
+static Msg_t msg;
 
-struct GlobalStatus
+static int is_valid(int counter, int mode)
 {
-  int flag;
-} status = {
-    .flag = 0};
-
-void broadcast()
-{
-}
-void check_rx_queues()
-{
+  if (mode == 1)
+  {
+    return 0;
+  }
+  else if (mode == 2)
+  {
+    if (counter % 2 == 0)
+    {
+      return 0;
+    }
+  }
+  return -1;
 }
 
 /**
  * How can we know the xQueues from the conn_task? 
  * 
  */
+/////////////////////////
+// check uart
 static void usart_task()
 {
-  int len = 0;
-  int i = 0;
+  struct timeval tv;
+  int64_t intTime;
+
   while (1)
   {
+    int counter = 0;
+    int len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 130 / portTICK_RATE_MS);
 
-    /////////////////////////
-    // check uart
-    /*     len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 150 / portTICK_RATE_MS);
-
-    if (len > 0)
+    if (len >= 7)
     {
+      counter++;
       printf("Usart rx %d\n", len);
-      for (i = 0; i < len; i++)
+      for (int i = 0; i < 7; i++)
       {
         printf("0x%2x  ", datausart[i]);
       }
       printf("\n");
-    }
-    else
-    {
-      printf("Usart rx non\n");
-    } */
 
-    ////////////////////////
-    // to check rx queue
-    //
+      gettimeofday(&tv, NULL);
+      intTime = ((int64_t)tv.tv_sec) * 1000LL + ((int64_t)tv.tv_usec) / 1000LL;
 
-    if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
-    {
-      printf("Check rx queue\n");
-      for (i = 0; i < QUEUE_LENGTH; i++)
+      // 0xcb  0x55  0x4
+      if (datausart[0] == 0xcb && datausart[1] == 0x55 && datausart[2] == 0x4)
       {
-        if (xManager[i].flag == 1)
+        // send a msg to
+        if (gStatus.enable == 1 && is_valid(counter, gStatus.mode) == 0)
         {
-          if (xQueueReceive(xManager[i].rx_queue, &msg, 200 / portTICK_RATE_MS))
+          // create notification msg
+
+          if (xQueueSend(uartQueue, &msg, 100 / portTICK_RATE_MS))
           {
-            printf("-> %d rx msg %d\n", i, msg.len);
+            printf("msg send from uart\n");
           }
         }
       }
-      xSemaphoreGive(xSemaphore);
-      vTaskDelay(500 / portTICK_RATE_MS);
     }
-
-    ///////////////////////////
-    // send sth. out to tx queue
-    //
-    /*
-    if (xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE)
-    {
-      for (i = 0; i < QUEUE_LENGTH; i++)
-      {
-        if (xManager[i].flag == 1)
-        {
-          if (xQueueSend(xManager[i].tx_queue, &msg, 50 / portTICK_RATE_MS))
-          {
-            printf("msg send\n");
-          }
-        }
-      }
-      xSemaphoreGive(xSemaphore);
-    }
-    */
   }
   vTaskDelete(NULL);
 }
@@ -114,6 +97,9 @@ void init_usart()
 
   uart_set_pin(UART_NUM_1, UT_TXD, UT_RXD, -1, -1);
   uart_driver_install(UART_NUM_1, BUF_SIZE * 2, 0, 0, NULL, 0);
+
+  printf("\nCreate uart queue\n");
+  uartQueue = create_queue();
 
   xTaskCreate(usart_task, "usart_task", 2048, NULL, 4, NULL);
 }
