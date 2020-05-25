@@ -30,6 +30,17 @@ void conf_gpio()
   off_led_link();
   off_led_stat();
   off_ut_pwr();
+
+  // set input pins
+  //interrupt of rising edge
+  io_conf.intr_type = GPIO_PIN_INTR_ANYEDGE;
+  //bit mask of the pins, use GPIO4/5 here
+  io_conf.pin_bit_mask = GPIO_INPUT_PIN_NO_TRIG_SEL;
+  //set as input mode
+  io_conf.mode = GPIO_MODE_INPUT;
+  //enable pull-up mode
+  io_conf.pull_up_en = 1;
+  gpio_config(&io_conf);
 }
 void on_ut_pwr()
 {
