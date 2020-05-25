@@ -75,7 +75,7 @@ void app_main()
     int cnt = 0;
     while (1)
     {
-        printf(". %d\n", cnt++);
+        // printf(". %d\n", cnt++);
         if (cnt % 2 == 1)
         {
             on_led_link();

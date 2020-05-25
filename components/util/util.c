@@ -6,6 +6,19 @@
 static const char *TAG = "Util";
 static uint16_t frame_seq = 0x01;
 
+int setstamp64(int64_t sec, int64_t usec)
+{
+  struct timeval tv;
+  struct timezone tz = {
+      0, 0};
+  tv.tv_sec = sec;
+  tv.tv_usec = usec;
+
+  settimeofday(&tv, &tz);
+
+  return 0;
+}
+
 int64_t getstamp64()
 {
   struct timeval tv;

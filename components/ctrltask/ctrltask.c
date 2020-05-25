@@ -14,15 +14,19 @@ extern SemaphoreHandle_t xSemaphore;
 extern QueueHandle_t uartQueue;
 
 GlobalStatus_t gStatus = {
-    .enable = 1,
-    .mode = 1};
-
-
+    .enable = 0,
+    .mode = 20};
 
 Msg_t msg;
 
 void handle_msg(Msg_t *msg)
 {
+  for (int i = 0; i < msg->len; i++)
+  {
+    printf("%x ", msg->buf[i]);
+  }
+  printf("\n");
+
   if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_WORKING_MODE)
   {
     if (msg->buf[3] == UT_MODE_1)
@@ -38,12 +42,14 @@ void handle_msg(Msg_t *msg)
       printf("Unrecognized UT_Mode\n");
     }
   }
-
-  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == ESP32_RESET)
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_RESET)
+  {
+    printf("UT reset\n");
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_RESET)
   {
     printf("ESP32 reset\n");
   }
-
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_SET_TIMESTAMP)
   {
     printf("ESP32 set timestamp\n");
@@ -83,7 +89,7 @@ void check_rx_queues()
         if (xQueueReceive(xManager[i].rx_queue, &msg, 100 / portTICK_RATE_MS))
         {
           printf("-> %d rx msg %d\n", i, msg.len);
-          void handle_msg(&msg);
+          handle_msg(&msg);
         }
       }
     }

@@ -7,6 +7,8 @@
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
+#include "esp_event.h"
+#include "esp_log.h"
 
 #include "../queue/include/queue.h"
 #include "../ctrltask/include/ctrltask.h"
@@ -14,11 +16,14 @@
 
 #include "./include/usart.h"
 
+static const char *TAG = "usart";
+
 extern QueueHandle_t uartQueue;
 extern GlobalStatus_t gStatus;
 
 uint8_t datausart[BUF_SIZE];
 static Msg_t msg;
+static int ENLOG = 0;
 
 static int is_valid(int counter, int mode)
 {
@@ -33,9 +38,19 @@ static int is_valid(int counter, int mode)
       return 0;
     }
   }
+  else if (mode == 4 || mode == 5 || mode == 10 || mode == 20 || mode == 25 || mode == 50)
+  {
+    if (counter % mode == 0)
+    {
+      return 0;
+    }
+  }
+  else
+  {
+    ESP_LOGE(TAG, "Unknow mode %d", mode);
+  }
   return -1;
 }
-
 /**
  * How can we know the xQueues from the conn_task? 
  * 
@@ -53,12 +68,16 @@ static void usart_task()
     if (len >= 7)
     {
       counter++;
-      printf("Usart rx %d\n", len);
-      for (int i = 0; i < 7; i++)
+
+      if (ENLOG)
       {
-        printf("0x%2x  ", datausart[i]);
+        printf("Usart rx %d\n", len);
+        for (int i = 0; i < 7; i++)
+        {
+          printf("0x%2x  ", datausart[i]);
+        }
+        printf("\n");
       }
-      printf("\n");
 
       int64_t iTime = getstamp64();
 
