@@ -10,6 +10,7 @@
 #include "../queue/include/queue.h"
 #include "./include/ctrltask.h"
 #include "../util/include/util.h"
+#include "../gpio/include/gpio.h"
 
 extern QueueManager_t xManager[];
 extern SemaphoreHandle_t xSemaphore;
@@ -56,10 +57,16 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_RESET)
   {
     printf("UT reset\n");
+    off_ut_pwr();
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+    on_ut_pwr();
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_RESET)
   {
     printf("ESP32 reset\n");
+    ESP_LOGE(TAG, "ESP32 Restarting now.\n");
+    fflush(stdout);
+    esp_restart();
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_SET_TIMESTAMP)
   {
@@ -142,7 +149,7 @@ void check_rx_queues()
     {
       if (xManager[i].flag == 1)
       {
-        if (xQueueReceive(xManager[i].rx_queue, &msg, 100 / portTICK_RATE_MS))
+        if (xQueueReceive(xManager[i].rx_queue, &msg, 50 / portTICK_RATE_MS))
         {
           printf("-> %d rx msg %d\n", i, msg.len);
           handle_msg(xManager[i].tx_queue, &msg);
@@ -167,7 +174,7 @@ static void ctrl_task()
     // check_rx_queues();
     check_rx_queues();
 
-    if (xQueueReceive(uartQueue, &msg, 200 / portTICK_RATE_MS))
+    if (xQueueReceive(uartQueue, &msg, 50 / portTICK_RATE_MS))
     {
       printf("-> rx msg %d\n", msg.len);
       // send out uart data
