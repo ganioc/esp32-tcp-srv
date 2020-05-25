@@ -6,15 +6,17 @@
 static const char *TAG = "Util";
 static uint16_t frame_seq = 0x01;
 
+static int LOGEN = 1;
+
 int setstamp64(int64_t sec, int64_t usec)
 {
   struct timeval tv;
-  struct timezone tz = {
-      0, 0};
+  // struct timezone tz = {
+  //     0, 0};
   tv.tv_sec = sec;
   tv.tv_usec = usec;
 
-  settimeofday(&tv, &tz);
+  settimeofday(&tv, NULL);
 
   return 0;
 }
@@ -24,6 +26,14 @@ int64_t getstamp64()
   struct timeval tv;
   gettimeofday(&tv, NULL);
   int64_t intTime = ((int64_t)tv.tv_sec) * 1000LL + ((int64_t)tv.tv_usec) / 1000LL;
+  int64_t temp = 0LL;
+
+  if (LOGEN == 1)
+  {
+    printf("getstamp64()\n");
+    printf("%lld\n", intTime);
+    printf("\n");
+  }
 
   return intTime;
 }

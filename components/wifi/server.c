@@ -135,11 +135,12 @@ static void socket_task(void *pvParameters)
                   // send it to ctrl task
                   msg.len = ((frame_buffer[3] << 8) | frame_buffer[4]) - 2;
                   ESP_LOGI(TAG, "Rx valid frame, len=%d", msg.len);
-
-                  for (int j = 0; j < msg.len; j++)
+                  int j;
+                  for (j = 0; j < msg.len; j++)
                   {
                     msg.buf[j] = frame_buffer[j + 5];
                   }
+                  msg.buf[j] = 0;
                   xQueueSend(rx_queue, &msg, portMAX_DELAY);
                 }
                 state = STATE_IDLE;

@@ -79,15 +79,14 @@ static void usart_task()
         printf("\n");
       }
 
-      int64_t iTime = getstamp64();
-
-      // 0xcb  0x55  0x4
+       // 0xcb  0x55  0x4
       if (datausart[0] == 0xcb && datausart[1] == 0x55 && datausart[2] == 0x4)
       {
         // send a msg to
         if (gStatus.enable == 1 && is_valid(counter, gStatus.mode) == 0)
         {
           // create notification msg
+          int64_t iTime = getstamp64();
           encodeSensorN(&msg, (char *)&datausart[3], iTime);
 
           if (xQueueSend(uartQueue, &msg, 100 / portTICK_RATE_MS))
