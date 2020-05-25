@@ -2,6 +2,7 @@
 #include "esp_log.h"
 #include "./include/util.h"
 #include "../queue/include/queue.h"
+#include <string.h>
 
 static const char *TAG = "Util";
 static uint16_t frame_seq = 0x01;
@@ -48,7 +49,7 @@ int stamp64ToBuffer(int64_t tmin, char *buf)
     ch8 = tm / temp;
     tm = tm - ch8 * temp;
     itoa(ch8, &ch[0], 10);
-    printf("%d ch8:%d ch[0]:%c\n", i, ch8, ch[0]);
+    // printf("%d ch8:%d ch[0]:%c\n", i, ch8, ch[0]);
 
     if (index == 0 && ch8 != 0)
     {
@@ -82,7 +83,7 @@ int64_t getstamp64()
   struct timeval tv;
   gettimeofday(&tv, NULL);
   int64_t intTime = ((int64_t)tv.tv_sec) * 1000LL + ((int64_t)tv.tv_usec) / 1000LL;
-  int64_t temp = 0LL;
+  // int64_t temp = 0LL;
 
   if (LOGEN == 1)
   {
@@ -97,20 +98,23 @@ int64_t getstamp64()
 int encodeSensorN(Msg_t *msg, char *data, int64_t timestamp)
 {
   int i = 0;
+  char buffer[24];
+
   msg->buf[i++] = CMD_NOTIFICATION;
   msg->buf[i++] = TARGET_ULTRA_SONIC;
   msg->buf[i++] = data[0];
   msg->buf[i++] = data[1];
   msg->buf[i++] = data[2];
   msg->buf[i++] = data[3];
-  msg->buf[i++] = 0xff & (timestamp >> 56);
-  msg->buf[i++] = 0xff & (timestamp >> 48);
-  msg->buf[i++] = 0xff & (timestamp >> 40);
-  msg->buf[i++] = 0xff & (timestamp >> 32);
-  msg->buf[i++] = 0xff & (timestamp >> 24);
-  msg->buf[i++] = 0xff & (timestamp >> 16);
-  msg->buf[i++] = 0xff & (timestamp >> 8);
-  msg->buf[i++] = 0xff & (timestamp >> 0);
+
+  // timestamp
+  stamp64ToBuffer(timestamp, buffer);
+
+  for (int j = 0; j < strlen(buffer); j++)
+  {
+    msg->buf[i++] = buffer[j];
+  }
+
   msg->len = i;
 
   return 0;

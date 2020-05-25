@@ -38,17 +38,14 @@ static int is_valid(int counter, int mode)
       return 0;
     }
   }
-  else if (mode == 4 || mode == 5 || mode == 10 || mode == 20 || mode == 25 || mode == 50)
+  else
   {
     if (counter % mode == 0)
     {
       return 0;
     }
   }
-  else
-  {
-    ESP_LOGE(TAG, "Unknow mode %d", mode);
-  }
+
   return -1;
 }
 /**
@@ -79,7 +76,7 @@ static void usart_task()
         printf("\n");
       }
 
-       // 0xcb  0x55  0x4
+      // 0xcb  0x55  0x4
       if (datausart[0] == 0xcb && datausart[1] == 0x55 && datausart[2] == 0x4)
       {
         // send a msg to
@@ -92,6 +89,7 @@ static void usart_task()
           if (xQueueSend(uartQueue, &msg, 100 / portTICK_RATE_MS))
           {
             printf("msg send from uart\n");
+            ESP_LOGI(TAG, "msg send from uart");
           }
         }
       }

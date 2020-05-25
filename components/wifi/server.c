@@ -186,6 +186,10 @@ static void socket_task(void *pvParameters)
           ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
           break;
         }
+        else
+        {
+          ESP_LOGI(TAG, "Send out %d", msg.len);
+        }
       }
     }
   }

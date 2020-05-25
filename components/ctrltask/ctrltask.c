@@ -15,6 +15,8 @@ extern QueueManager_t xManager[];
 extern SemaphoreHandle_t xSemaphore;
 extern QueueHandle_t uartQueue;
 
+static const char *TAG = "ctrltask";
+
 GlobalStatus_t gStatus = {
     .enable = 0,
     .mode = 20};
@@ -34,14 +36,21 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     if (msg->buf[3] == UT_MODE_1)
     {
       printf("To set UT_MODE_1\n");
+      gStatus.enable = 1;
+      gStatus.mode = 1;
     }
     else if (msg->buf[3] == UT_MODE_2)
     {
       printf("To set UT_MODE_2\n");
+      gStatus.enable = 1;
+      gStatus.mode = 2;
     }
-    else
+    else if (msg->buf[3] > 5 && msg->buf[3] < 30)
     {
       printf("Unrecognized UT_Mode\n");
+
+      gStatus.enable = 1;
+      gStatus.mode = msg->buf[3];
     }
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_RESET)
@@ -116,7 +125,8 @@ void broadcast(Msg_t *mMsg)
       {
         if (xQueueSend(xManager[i].tx_queue, mMsg, 50 / portTICK_RATE_MS))
         {
-          printf("msg send\n");
+          printf("msg send: \n");
+          ESP_LOGI(TAG, "msg send %d", mMsg->len);
         }
       }
     }
