@@ -53,6 +53,35 @@ void handle_msg(Msg_t *msg)
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_SET_TIMESTAMP)
   {
     printf("ESP32 set timestamp\n");
+    if (msg->len == 11)
+    {
+      int64_t tm = 0;
+      int64_t temp = 0;
+
+      temp = msg->buf[3];
+      tm += temp << 56;
+      temp = msg->buf[4];
+      tm += temp << 48;
+      temp = msg->buf[5];
+      tm += temp << 40;
+      temp = msg->buf[6];
+      tm += temp << 32;
+      temp = msg->buf[7];
+      tm += temp << 24;
+      temp = msg->buf[8];
+      tm += temp << 16;
+      temp = msg->buf[9];
+      tm += temp << 8;
+      temp = msg->buf[10];
+      tm += temp << 0;
+
+      setstamp64(tm / 1000, (tm % 1000) * 1000);
+      printf("set timestamp\n");
+    }
+    else
+    {
+      printf("Wrong packet length: %d\n", msg->len);
+    }
   }
   else
   {
