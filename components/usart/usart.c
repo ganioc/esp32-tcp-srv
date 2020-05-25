@@ -24,9 +24,11 @@ extern GlobalStatus_t gStatus;
 uint8_t datausart[BUF_SIZE];
 static Msg_t msg;
 static int ENLOG = 0;
+int counter = 0;
 
 static int is_valid(int counter, int mode)
 {
+
   if (mode == 1)
   {
     return 0;
@@ -35,6 +37,10 @@ static int is_valid(int counter, int mode)
   {
     if (counter % 2 == 0)
     {
+      if (ENLOG == 1)
+      {
+        printf("mode %d , counter %d\n", mode, counter);
+      }
       return 0;
     }
   }
@@ -42,6 +48,10 @@ static int is_valid(int counter, int mode)
   {
     if (counter % mode == 0)
     {
+      if (ENLOG == 1)
+      {
+        printf("mode %d , counter %d\n", mode, counter);
+      }
       return 0;
     }
   }
@@ -59,7 +69,7 @@ static void usart_task()
 
   while (1)
   {
-    int counter = 0;
+
     int len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 130 / portTICK_RATE_MS);
 
     if (len >= 7)

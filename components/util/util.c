@@ -94,6 +94,27 @@ int64_t getstamp64()
 
   return intTime;
 }
+int encodeUTReset(Msg_t *msg, uint8_t err, int64_t timestamp)
+{
+  int i = 0;
+  char buffer[24];
+
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ULTRA_SONIC;
+  msg->buf[i++] = err;
+  msg->buf[i++] = UT_RESET;
+
+  stamp64ToBuffer(timestamp, buffer);
+
+  for (int j = 0; j < strlen(buffer); j++)
+  {
+    msg->buf[i++] = buffer[j];
+  }
+
+  msg->len = i;
+
+  return 0;
+}
 
 int encodeSensorN(Msg_t *msg, char *data, int64_t timestamp)
 {

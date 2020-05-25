@@ -28,6 +28,7 @@
 
 #define ESP32_RESET 0x1
 #define ESP32_SET_TIMESTAMP 0x2
+#define ESP32_GET_TIMESTAMP 0x3
 
 #define STATE_IDLE 0x0
 #define STATE_SEQ1 0x01
@@ -44,3 +45,4 @@ int check_crc(char *buf);
 int create_frame(char *buf, Msg_t msg);
 int64_t stamp64FromBuffer(char *buf, int len);
 int stamp64ToBuffer(int64_t tm, char *buf);
+int encodeUTReset(Msg_t *msg, uint8_t err, int64_t timestamp);

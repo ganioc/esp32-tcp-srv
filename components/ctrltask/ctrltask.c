@@ -20,12 +20,14 @@ static const char *TAG = "ctrltask";
 
 GlobalStatus_t gStatus = {
     .enable = 0,
-    .mode = 20};
+    .mode = 1};
 
 Msg_t msg;
 
 void handle_msg(QueueHandle_t queue, Msg_t *msg)
 {
+  char buffer[32];
+
   for (int i = 0; i < msg->len; i++)
   {
     printf("%x ", msg->buf[i]);
@@ -48,7 +50,7 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     }
     else if (msg->buf[3] > 5 && msg->buf[3] < 30)
     {
-      printf("Unrecognized UT_Mode\n");
+      printf(" UT_Mode %d\n", msg->buf[3]);
 
       gStatus.enable = 1;
       gStatus.mode = msg->buf[3];
@@ -58,6 +60,15 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   {
     printf("UT reset\n");
     off_ut_pwr();
+
+    int64_t iTime = getstamp64();
+    encodeUTReset(msg, 0, iTime);
+    // send back feedback
+    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
+    {
+      ESP_LOGI(TAG, "msg send reset UT %d", msg->len);
+    }
+
     vTaskDelay(500 / portTICK_PERIOD_MS);
     on_ut_pwr();
   }
@@ -74,7 +85,6 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     int err = 0;
     int index = 0;
     int i;
-    char buffer[32];
 
     printf("ESP32 set timestamp\n");
     if (msg->len >= 12)
@@ -114,6 +124,37 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     else
     {
       printf("set timestamp msg send  Failed ->\n");
+    }
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_GET_TIMESTAMP)
+  {
+    printf("get timestamp msg\n");
+    int64_t tm = getstamp64();
+    printf("\ntm is:%lld\n", tm);
+    stamp64ToBuffer(tm, buffer);
+
+    printf("buffer length: %d\n", strlen(buffer));
+
+    int index = 0;
+    msg->buf[index++] = 0x02;
+    msg->buf[index++] = TARGET_ESP32;
+    msg->buf[index++] = 0;
+    msg->buf[index++] = ESP32_GET_TIMESTAMP;
+    for (int i = 0; i < strlen(buffer); i++)
+    {
+      msg->buf[index++] = buffer[i];
+      printf("%x ", buffer[i]);
+    }
+    printf("\n");
+    msg->len = index;
+    // send back response
+    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
+    {
+      printf("get timestamp msg send ->\n");
+    }
+    else
+    {
+      printf("get timestamp msg send  Failed ->\n");
     }
   }
   else
