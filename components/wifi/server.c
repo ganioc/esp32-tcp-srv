@@ -33,6 +33,7 @@ static void socket_task(void *pvParameters)
   int frame_index = 0;
   int state = STATE_IDLE;
   int frame_len = 0;
+
   int sock = *((int *)pvParameters);
   int len = 0;
 
@@ -175,6 +176,16 @@ static void socket_task(void *pvParameters)
     if (xQueueReceive(tx_queue, &msg, 100 / portTICK_RATE_MS))
     {
       printf("<-- msg %d\n", msg.len);
+      int send_len = create_frame(rx_buffer, msg);
+      if (send_len > 0)
+      {
+        int err = send(sock, rx_buffer, send_len, 0);
+        if (err < 0)
+        {
+          ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+          break;
+        }
+      }
     }
   }
   // Dont need to close sock, when len == 0?

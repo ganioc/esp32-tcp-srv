@@ -17,6 +17,16 @@
 #define TARGET_ESP32 0x10
 #define TARGET_HOST 0x11
 //
+
+#define UT_WORKING_MODE 0x20
+// mode=1, Send every packet
+// mode=2,  Send every other packet
+#define UT_MODE_1 0x21
+#define UT_MODE_2 0x22
+
+#define ESP32_RESET 0x30
+#define ESP32_SET_TIMESTAMP 0x31
+
 #define STATE_IDLE 0x0
 #define STATE_SEQ1 0x01
 #define STATE_SEQ2 0x02
@@ -28,3 +38,4 @@ int64_t getstamp64();
 int encodeSensorN(Msg_t *msg, char *data, int64_t timestamp);
 // uint16_t calCRC16(const uint8_t *data, uint32_t size);
 int check_crc(char *buf);
+int create_frame(char *buf, Msg_t msg);

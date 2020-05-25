@@ -4,6 +4,7 @@
 #include "../queue/include/queue.h"
 
 static const char *TAG = "Util";
+static uint16_t frame_seq = 0x01;
 
 int64_t getstamp64()
 {
@@ -87,4 +88,27 @@ int check_crc(char *buf)
   }
 
   return 0;
+}
+/**
+ * 
+ * return frame length
+ */
+int create_frame(char *buf, Msg_t msg)
+{
+  int index = 0;
+  uint16_t seq = frame_seq++;
+  uint16_t len = msg.len + 2;
+  buf[index++] = 0x01;
+
+  buf[index++] = 0xff & (seq >> 8);
+  buf[index++] = 0xff & seq;
+  buf[index++] = (len >> 8) & 0xff;
+  buf[index++] = len & 0xff;
+  for (int i = 0; i < (len - 2); i++)
+  {
+    buf[index++] = msg.buf[i];
+  }
+  buf[index++] = 0xff;
+  buf[index++] = 0xff;
+  return index;
 }
