@@ -42,3 +42,5 @@ int encodeSensorN(Msg_t *msg, char *data, int64_t timestamp);
 // uint16_t calCRC16(const uint8_t *data, uint32_t size);
 int check_crc(char *buf);
 int create_frame(char *buf, Msg_t msg);
+int64_t stamp64FromBuffer(char *buf, int len);
+int stamp64ToBuffer(int64_t tm, char *buf);

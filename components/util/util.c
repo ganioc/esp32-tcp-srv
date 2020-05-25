@@ -8,6 +8,62 @@ static uint16_t frame_seq = 0x01;
 
 static int LOGEN = 1;
 
+int64_t stamp64FromBuffer(char *buf, int len)
+{
+  char ch[2];
+  uint8_t ch8;
+  int i, j;
+  int64_t temp, tm = 0;
+  for (i = 0; i < len; i++)
+  {
+    ch[0] = buf[i];
+    ch[1] = 0;
+    ch8 = atoi((char *)&ch[0]);
+    temp = 1ll;
+    for (j = 1; j < len - i; j++)
+    {
+      temp *= 10;
+    }
+    tm += ch8 * temp;
+  }
+  return tm;
+}
+int stamp64ToBuffer(int64_t tmin, char *buf)
+{
+  int index = 0;
+  int i, j;
+  uint64_t temp, tm;
+  char ch[2];
+  uint8_t ch8;
+
+  tm = tmin;
+
+  for (i = 16; i >= 0; i--)
+  {
+    temp = 1;
+    for (j = 0; j < i; j++)
+    {
+      temp *= 10;
+    }
+    ch8 = tm / temp;
+    tm = tm - ch8 * temp;
+    itoa(ch8, &ch[0], 10);
+    printf("%d ch8:%d ch[0]:%c\n", i, ch8, ch[0]);
+
+    if (index == 0 && ch8 != 0)
+    {
+      buf[index++] = ch[0];
+    }
+    else if (index > 0)
+    {
+      buf[index++] = ch[0];
+    }
+  }
+
+  buf[index] = 0;
+  return 0;
+}
+
 int setstamp64(int64_t sec, int64_t usec)
 {
   struct timeval tv;

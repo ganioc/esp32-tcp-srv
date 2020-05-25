@@ -54,29 +54,16 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_SET_TIMESTAMP)
   {
-    int64_t tm = 0, temp = 0;
+    int64_t tm = 0;
     int err = 0;
     int index = 0;
-    int i, j, len;
-    char buffer[32], ch[2];
-    uint8_t ch8;
-    printf("ESP32 set timestamp\n");
-    if (msg->len >= 3)
-    {
-      len = msg->len - 3;
-      for (i = 0; i < len; i++)
-      {
-        ch[0] = msg->buf[3 + i];
-        ch[1] = 0;
-        ch8 = atoi((char *)&ch[0]);
-        temp = 1ll;
-        for (j = 1; j < len - i; j++)
-        {
-          temp *= 10;
-        }
-        tm += ch8 * temp;
-      }
+    int i;
+    char buffer[32];
 
+    printf("ESP32 set timestamp\n");
+    if (msg->len >= 12)
+    {
+      tm = stamp64FromBuffer((char *)&msg->buf[3], msg->len - 3);
       printf("tm is %lld\n", tm);
       setstamp64(tm / 1000, (tm % 1000) * 1000);
     }
@@ -87,29 +74,8 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     }
     tm = getstamp64();
     printf("\ntm is:%lld\n", tm);
-    index = 0;
-    for (i = 16; i >= 0; i--)
-    {
-      temp = 1;
-      for (j = 0; j < i; j++)
-      {
-        temp *= 10;
-      }
-      ch8 = tm / temp;
-      tm = tm - ch8 * temp;
-      itoa(ch8, &ch[0], 10);
-      printf("%d ch8:%d ch[0]:%c\n", i, ch8, ch[0]);
+    stamp64ToBuffer(tm, buffer);
 
-      if (index == 0 && ch8 != 0)
-      {
-        buffer[index++] = ch[0];
-      }
-      else if (index > 0)
-      {
-        buffer[index++] = ch[0];
-      }
-    }
-    buffer[index] = 0;
     printf("buffer length: %d\n", strlen(buffer));
 
     index = 0;
