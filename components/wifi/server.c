@@ -21,6 +21,7 @@
 
 #include "include/server.h"
 #include "../queue/include/queue.h"
+#include "../util/include/util.h"
 
 static const char *TAG = "TCP server";
 static Msg_t msg;
@@ -28,6 +29,10 @@ static Msg_t msg;
 static void socket_task(void *pvParameters)
 {
   char rx_buffer[256];
+  char frame_buffer[256];
+  int frame_index = 0;
+  int state = STATE_IDLE;
+  int frame_len = 0;
   int sock = *((int *)pvParameters);
   int len = 0;
 
@@ -53,6 +58,7 @@ static void socket_task(void *pvParameters)
     /////////////////////////
     // receive from  socket
     /////////////////////////
+    // 200 ms timeout
     s = select(sock + 1, &rfds, NULL, NULL, &tv);
     // len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
     // Error occurred during receiving
@@ -86,16 +92,75 @@ static void socket_task(void *pvParameters)
         {
           ESP_LOGI(TAG, "Received %d bytes", len);
           // ESP_LOGI(TAG, "%s", rx_buffer);
-          rx_buffer[len] = 0;
-          msg.len = len;
-          for (int j = 0; j < len; j++)
+
+          for (int k = 0; k < len; k++)
           {
-            msg.buf[j] = rx_buffer[j];
+            switch (state)
+            {
+            case STATE_IDLE:
+              if (rx_buffer[k] == 0x01)
+              {
+                frame_index = 0;
+                frame_buffer[frame_index++] = rx_buffer[k];
+                state = STATE_SEQ1;
+              }
+              break;
+            case STATE_SEQ1:
+              frame_buffer[frame_index++] = rx_buffer[k];
+              state = STATE_SEQ2;
+              break;
+            case STATE_SEQ2:
+              frame_buffer[frame_index++] = rx_buffer[k];
+              state = STATE_LEN1;
+              break;
+            case STATE_LEN1:
+              frame_buffer[frame_index++] = rx_buffer[k];
+              frame_len = (rx_buffer[k] << 8) & 0xFFFF;
+              state = STATE_LEN2;
+              break;
+            case STATE_LEN2:
+              frame_buffer[frame_index++] = rx_buffer[k];
+              frame_len += rx_buffer[k];
+              state = STATE_CONTENT;
+              break;
+            case STATE_CONTENT:
+              frame_buffer[frame_index++] = rx_buffer[k];
+              frame_len--;
+              if (frame_len == 0)
+              {
+                // check CRC
+                if (check_crc(frame_buffer) == 0)
+                {
+                  // send it to ctrl task
+                  msg.len = ((frame_buffer[3] << 8) | frame_buffer[4]) - 2;
+                  ESP_LOGI(TAG, "Rx valid frame, len=%d", msg.len);
+
+                  for (int j = 0; j < msg.len; j++)
+                  {
+                    msg.buf[j] = frame_buffer[j + 5];
+                  }
+                  xQueueSend(rx_queue, &msg, portMAX_DELAY);
+                }
+                state = STATE_IDLE;
+                frame_index = 0;
+              }
+              break;
+            default:
+              break;
+            }
           }
 
-          xQueueSend(rx_queue, &msg, portMAX_DELAY);
+          // rx_buffer[len] = 0;
+          // msg.len = len;
+          // for (int j = 0; j < len; j++)
+          // {
+          //   msg.buf[j] = rx_buffer[j];
+          // }
 
-          /*          int err = send(sock, rx_buffer, len, 0);
+          // xQueueSend(rx_queue, &msg, portMAX_DELAY);
+
+          /*          
+          int err = send(sock, rx_buffer, len, 0);
           if (err < 0)
           {
             ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);

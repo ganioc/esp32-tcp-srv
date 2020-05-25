@@ -66,14 +66,9 @@ static void ctrl_task()
 
   while (1)
   {
-    ////////////////////////
-    // to check rx queue, change global status
-    // check_rx_queues();
-
     if (xQueueReceive(uartQueue, &msg, 200 / portTICK_RATE_MS))
     {
       printf("-> rx msg %d\n", msg.len);
-
       // send out uart data
       ///////////////////////////
       // send sth. out to tx queue
@@ -81,6 +76,10 @@ static void ctrl_task()
 
       // send out switch data
     }
+    ////////////////////////
+    // to check rx queue, change global status
+    // check_rx_queues();
+    check_rx_queues();
   }
 }
 void init_ctrltask()
