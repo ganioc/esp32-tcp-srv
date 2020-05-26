@@ -8,7 +8,7 @@
 
 #include "./include/gpio.h"
 
-static xQueueHandle gpio_evt_queue = NULL;
+xQueueHandle gpio_evt_queue = NULL;
 
 static void IRAM_ATTR gpio_isr_handler(void *arg)
 {

@@ -46,3 +46,4 @@ int create_frame(char *buf, Msg_t msg);
 int64_t stamp64FromBuffer(char *buf, int len);
 int stamp64ToBuffer(int64_t tm, char *buf);
 int encodeUTReset(Msg_t *msg, uint8_t err, int64_t timestamp);
+int encodeSwitchN(Msg_t *msg, int num_switch, int level, int64_t timestamp);

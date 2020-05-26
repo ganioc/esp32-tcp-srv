@@ -15,6 +15,7 @@
 extern QueueManager_t xManager[];
 extern SemaphoreHandle_t xSemaphore;
 extern QueueHandle_t uartQueue;
+extern xQueueHandle gpio_evt_queue;
 
 static const char *TAG = "ctrltask";
 
@@ -207,7 +208,9 @@ void check_rx_queues()
  */
 static void ctrl_task()
 {
-
+  uint32_t io_num;
+  int num_switch = 0;
+  int level_switch;
   while (1)
   {
     ////////////////////////
@@ -224,6 +227,32 @@ static void ctrl_task()
       broadcast(&msg);
 
       // send out switch data
+    }
+
+    // check gpio interrupt
+    if (xQueueReceive(gpio_evt_queue, &io_num, 50 / portTICK_RATE_MS))
+    {
+      int64_t iTime = getstamp64();
+      level_switch = gpio_get_level(io_num);
+      // printf("GPIO[%d] intr, val: %d\n", io_num, level_switch);
+
+      if (io_num == GPIO_DIN_1)
+      {
+        num_switch = TARGET_SWITCH_1;
+        printf("DIN1 intr, val: %d\n", level_switch);
+      }
+      else if (io_num == GPIO_DIN_2)
+      {
+        num_switch = TARGET_SWITCH_2;
+        printf("DIN2 intr, val: %d\n", level_switch);
+      }
+      else
+      {
+        ESP_LOGE(TAG, "Unknown io num: %d", io_num);
+        continue;
+      }
+      encodeSwitchN(&msg, num_switch, level_switch, iTime);
+      broadcast(&msg);
     }
   }
 }
