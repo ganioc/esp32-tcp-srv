@@ -75,6 +75,7 @@ void app_main()
     int cnt = 0;
     while (1)
     {
+        cnt++;
         // printf(". %d\n", cnt++);
         if (cnt % 2 == 1)
         {
