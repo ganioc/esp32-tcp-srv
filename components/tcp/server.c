@@ -22,6 +22,7 @@
 #include "include/server.h"
 #include "../queue/include/queue.h"
 #include "../util/include/util.h"
+#include "../wifi/include/wifi.h"
 
 static const char *TAG = "TCP server";
 static Msg_t msg;
@@ -217,7 +218,7 @@ static void tcp_server_task(void *pvParameters)
   {
     // #ifdef CONFIG_EXAMPLE_IPV4
     struct sockaddr_in dest_addr;
-    dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    dest_addr.sin_addr.s_addr = htonl(LONG_STATIC_IP);
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(SERVER_PORT);
     addr_family = AF_INET;

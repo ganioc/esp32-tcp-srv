@@ -80,7 +80,7 @@ void init_sta()
   IP4_ADDR(&static_IP_info.ip, 192, 168, 32, 108);
   IP4_ADDR(&static_IP_info.gw, 192, 168, 32, 1);
   IP4_ADDR(&static_IP_info.netmask, 255, 255, 255, 0);
-  tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &static_IP_info);
+  // tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &static_IP_info);
 
   ESP_ERROR_CHECK(esp_event_loop_create_default());
 
@@ -99,7 +99,7 @@ void init_sta()
           .ssid = EXAMPLE_ESP_WIFI_SSID,
           .password = EXAMPLE_ESP_WIFI_PASS},
   };
-  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
