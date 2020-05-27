@@ -13,6 +13,9 @@
 #define EXAMPLE_STATIC_IP "192.168.32.108"
 #define LONG_STATIC_IP ((u32_t)0xC0A8206CUL)
 
+#define ESP_AP_SSID "ruff-hub-sensor"
+#define ESP_AP_PASS "nanchao123"
+
 // Prototypes
 // wifi init
 // void init_softap();

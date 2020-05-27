@@ -99,8 +99,20 @@ void init_sta()
           .ssid = EXAMPLE_ESP_WIFI_SSID,
           .password = EXAMPLE_ESP_WIFI_PASS},
   };
+
+  // ap
+  wifi_config_t ap_config = {
+      .ap = {
+          .ssid = ESP_AP_SSID,
+          .ssid_len = strlen(ESP_AP_SSID),
+          .password = ESP_AP_PASS,
+          .max_connection = 2,
+          .authmode = WIFI_AUTH_WPA_WPA2_PSK},
+  };
+
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+  ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
   ESP_LOGI(TAG, "wifi_init_sta finished.");

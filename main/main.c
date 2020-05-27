@@ -64,7 +64,7 @@ void app_main()
     init_usart();
 
     // turn on ctrl task
-    printf("\n inti ctrltask\n");
+    printf("\ninit ctrltask\n");
     init_ctrltask();
 
     // turn on ultra sonic hub power
