@@ -13,7 +13,7 @@
 
 #include "../components/gpio/include/gpio.h"
 #include "../components/wifi/include/wifi.h"
-#include "../components/wifi/include/server.h"
+#include "../components/tcp/include/server.h"
 #include "../components/usart/include/usart.h"
 #include "../components/queue/include/queue.h"
 #include "../components/ctrltask/include/ctrltask.h"
