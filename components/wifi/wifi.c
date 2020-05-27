@@ -84,10 +84,12 @@ static void event_handler(void *arg, esp_event_base_t event_base,
   else if (event_id == WIFI_EVENT_AP_START)
   {
     ESP_LOGI(TAG, "AP Started");
+    // open http server
   }
   else if (event_id == WIFI_EVENT_AP_STOP)
   {
     ESP_LOGI(TAG, "AP Stopped");
+    // close http server
   }
 }
 void init_sta()
