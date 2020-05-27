@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Change this, for version update
-set(PROJECT_VER "0.0.1")
+set(PROJECT_VER "0.1.0")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(esp32-sensors)
