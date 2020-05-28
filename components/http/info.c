@@ -17,8 +17,6 @@
 
 static const char *TAG = "HTTP info";
 
-char *strInfo = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>信息</title><script></script><style>    body {      text-align: center;      font-size: medium;      color: #2ca089;    }    footer {      font-size: small;      color: #2ca089;      text-align: center;    }    a {      color: aquamarine;    }</style></head><body><h2>信息</h2><section><p>ESP32 AP+STA mode</p></section><p>Version:%s</p><p>SSID:%s</p><p>PASS:%s</p><p><a href=\"/\">返回</a></p></body></html>";
-
 /* An HTTP GET handler */
 esp_err_t
 info_get_handler(httpd_req_t *req)
@@ -96,8 +94,10 @@ info_get_handler(httpd_req_t *req)
   /* Send response with custom headers and body set as the
      * string passed in user context*/
   // const char *resp_str = (const char *)req->user_ctx;
-  char *resp_str = strInfo;
+  char *resp_str = malloc(1024);
+  sprintf(resp_str, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>信息</title><script></script><style>    body {      text-align: center;      font-size: medium;      color: #2ca089;    }    footer {      font-size: small;      color: #2ca089;      text-align: center;    }    a {      color: aquamarine;    }</style></head><body><h2>信息</h2><section><p>ESP32 AP+STA mode</p></section><p>Version:%s</p><p>SSID:%s</p><p>PASS:%s</p><p><a href=\"/\">返回</a></p></body></html>", getVersion(), "net", "pass");
   httpd_resp_send(req, resp_str, strlen(resp_str));
+  free(resp_str);
 
   /* After sending the HTTP response the old HTTP request
      * headers are lost. Check if HTTP request headers can be read now. */
