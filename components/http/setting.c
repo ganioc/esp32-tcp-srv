@@ -15,14 +15,16 @@
 
 #include "./include/http.h"
 
-static const char *TAG = "HTTP info";
+static const char *TAG = "HTTP setting";
 
-/* An HTTP GET handler */
 esp_err_t
-info_get_handler(httpd_req_t *req)
+setting_get_handler(httpd_req_t *req)
 {
   char *buf;
   size_t buf_len;
+  char param[32];
+  char param1[32];
+  char param2[32];
 
   /* Get header value string length and allocate memory for length + 1,
      * extra byte for null termination */
@@ -69,19 +71,19 @@ info_get_handler(httpd_req_t *req)
     if (httpd_req_get_url_query_str(req, buf, buf_len) == ESP_OK)
     {
       ESP_LOGI(TAG, "Found URL query => %s", buf);
-      char param[32];
+
       /* Get value of expected key from query string */
       if (httpd_query_key_value(buf, "query1", param, sizeof(param)) == ESP_OK)
       {
         ESP_LOGI(TAG, "Found URL query parameter => query1=%s", param);
       }
-      if (httpd_query_key_value(buf, "query2", param, sizeof(param)) == ESP_OK)
+      if (httpd_query_key_value(buf, "query2", param1, sizeof(param1)) == ESP_OK)
       {
-        ESP_LOGI(TAG, "Found URL query parameter => query2=%s", param);
+        ESP_LOGI(TAG, "Found URL query parameter => query2=%s", param1);
       }
-      if (httpd_query_key_value(buf, "query3", param, sizeof(param)) == ESP_OK)
+      if (httpd_query_key_value(buf, "query3", param2, sizeof(param2)) == ESP_OK)
       {
-        ESP_LOGI(TAG, "Found URL query parameter => query3=%s", param);
+        ESP_LOGI(TAG, "Found URL query parameter => query3=%s", param2);
       }
     }
     free(buf);
@@ -95,10 +97,18 @@ info_get_handler(httpd_req_t *req)
      * string passed in user context*/
   // const char *resp_str = (const char *)req->user_ctx;
   char *resp_str = malloc(1024);
-  sprintf(resp_str, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>信息</title><script></script><style>    body {      text-align: center;      font-size: medium;      color: #2ca089;    }    footer {      font-size: small;      color: #2ca089;      text-align: center;    }    a {      color: aquamarine;    }</style></head><body><h2>信息</h2><section><p>ESP32 AP+STA mode</p></section><p>Version:%s</p><p>SSID:%s</p><p>PASS:%s</p><p><a href=\"/\">返回</a></p></body><footer><p>2020 Ruff Team</p></footer></html>", getVersion(), "net", "pass");
-  httpd_resp_send(req, resp_str, strlen(resp_str));
+  if (strcmp(param, "cmd") == 0)
+  {
+    ESP_LOGI(TAG, "Receive cmd");
+    sprintf(resp_str, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>ESP32配置</title><script type=\"text/javascript\">    (function (window, document, undefined) {      window.onload = init;      function init() {      }    })(window, document, undefined);</script><style>    body {      text-align: center;      font-size: medium;      color: #2ca089;    }    footer {      font-size: small;      color: #2ca089;      text-align: center;    }    a {      color: aquamarine;    }    .form-item {      margin-bottom: 10px;    }</style></head><body><h3>配置结果</h3><section><p>%s</p><p>SSID:</p><p>PASS:</p></section><section><p><a href=\"/\">返回</a></p></section></body></html>", "OK");
+    httpd_resp_send(req, resp_str, strlen(resp_str));
+  }
+  else
+  {
+    sprintf(resp_str, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><title>ESP32配置</title><script type=\"text/javascript\">    (function (window, document, undefined) {      window.onload = init;    function init() { } })(window, document, undefined);</script><style>    body {      text-align: center;  font-size: medium;    color: #2ca089;  }    footer { font-size: small;  color: #2ca089;      text-align: center;    }  a {      color: aquamarine;  }  .form-item {   margin-bottom: 10px;  }</style></head><body><h3>配置界面</h3><section><form action=\"/setting\" method=\"get\"><div class=\"form-item\"><label>CMD</label><input type=\"text\" name=\"query1\" id=\"query1\" value=\"cmd\" /></div><div class=\"form-item\"><label>SSID</label><input type=\"text\" name=\"query2\" id=\"query2\" /></div><div class=\"form-item\"><label>PASS</label><input type=\"text\" name=\"query3\" id=\"query3\" /></div><input type=\"submit\" value=\"提交\" style=\" width : 100px;font-size: x-large\"></form></section><section><p><a href=\"/\">返回</a></p></section></body></html>");
+    httpd_resp_send(req, resp_str, strlen(resp_str));
+  }
   free(resp_str);
-
   /* After sending the HTTP response the old HTTP request
      * headers are lost. Check if HTTP request headers can be read now. */
   if (httpd_req_get_hdr_value_len(req, "Host") == 0)
@@ -108,10 +118,10 @@ info_get_handler(httpd_req_t *req)
   return ESP_OK;
 }
 
-httpd_uri_t info = {
-    .uri = "/info",
+httpd_uri_t setting = {
+    .uri = "/setting",
     .method = HTTP_GET,
-    .handler = info_get_handler,
+    .handler = setting_get_handler,
     /* Let's pass response string in user
      * context to demonstrate it's usage */
-    .user_ctx = "Page Info"};
+    .user_ctx = "Page Setting"};

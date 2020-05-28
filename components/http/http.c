@@ -19,6 +19,7 @@ static const char *TAG = "HTTP APP";
 
 extern httpd_uri_t home;
 extern httpd_uri_t info;
+extern httpd_uri_t setting;
 
 char *getVersion()
 {
@@ -257,6 +258,7 @@ static httpd_handle_t start_webserver(void)
     // httpd_register_uri_handler(server, &ctrl);
     httpd_register_uri_handler(server, &home);
     httpd_register_uri_handler(server, &info);
+    httpd_register_uri_handler(server, &setting);
     return server;
   }
 
