@@ -13,7 +13,9 @@
 
 #include <esp_http_server.h>
 
-static const char *TAG = "example";
+#include "./include/http.h"
+
+static const char *TAG = "HTTP APP";
 
 /* An HTTP GET handler */
 static esp_err_t hello_get_handler(httpd_req_t *req)
