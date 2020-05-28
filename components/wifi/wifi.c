@@ -102,7 +102,6 @@ void init_sta()
   IP4_ADDR(&static_IP_info.ip, 192, 168, 32, 108);
   IP4_ADDR(&static_IP_info.gw, 192, 168, 32, 1);
   IP4_ADDR(&static_IP_info.netmask, 255, 255, 255, 0);
-  // tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &static_IP_info);
 
   ESP_ERROR_CHECK(esp_event_loop_create_default());
 

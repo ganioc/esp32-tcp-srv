@@ -17,6 +17,7 @@
 #include "../components/usart/include/usart.h"
 #include "../components/queue/include/queue.h"
 #include "../components/ctrltask/include/ctrltask.h"
+#include "../components/http/include/http.h"
 
 void app_main()
 {
@@ -58,6 +59,9 @@ void app_main()
     // tcp server on
     printf("\nTurn on tcp server\n");
     init_server();
+
+    // http server on
+    init_http();
 
     // turn on uart task
     printf("\ninit usart\n");
