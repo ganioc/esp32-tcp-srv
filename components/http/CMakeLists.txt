@@ -7,7 +7,7 @@ set(EXTRA_COMPONENT_DIRS $ENV{IDF_PATH}/examples/common_components/protocol_exam
 # set(COMPONENT_PRIV_REQUIRES  nvs_flash )
 # register_component()
 
-idf_component_register(SRCS "http.c" "home.c"
+idf_component_register(SRCS "http.c" "home.c" "info.c"
                        INCLUDE_DIRS "." "include" "$ENV{IDF_PATH}/examples/common_components/protocol_examples_common/include"
                        PRIV_REQUIRES  nvs_flash esp_http_server
                        )

@@ -18,6 +18,16 @@
 static const char *TAG = "HTTP APP";
 
 extern httpd_uri_t home;
+extern httpd_uri_t info;
+
+char *getVersion()
+{
+#ifdef PROJECT_VER
+  return PROJECT_VER;
+#else
+  return "1.0";
+#endif
+}
 
 /* An HTTP GET handler */
 static esp_err_t
@@ -246,6 +256,7 @@ static httpd_handle_t start_webserver(void)
     httpd_register_uri_handler(server, &echo);
     // httpd_register_uri_handler(server, &ctrl);
     httpd_register_uri_handler(server, &home);
+    httpd_register_uri_handler(server, &info);
     return server;
   }
 

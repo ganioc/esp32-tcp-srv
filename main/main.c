@@ -83,14 +83,22 @@ void app_main()
         // printf(". %d\n", cnt++);
         if (cnt % 2 == 1)
         {
-            on_led_link();
+            // on_led_stat();
+            if (getWifiLink(0 == 1))
+            {
+                on_led_link();
+            }
         }
         else
         {
-            off_led_link();
+            // off_led_stat();
+            if (getWifiLink(0 == 1))
+            {
+                off_led_link();
+            }
         }
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
     // printf("Restarting now.\n");
     // fflush(stdout);
