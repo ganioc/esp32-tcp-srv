@@ -134,7 +134,66 @@ int encodeSwitchN(Msg_t *msg, int num_switch, int level, int64_t timestamp)
 
   return 0;
 }
+int encodeUTModeStopRsp(Msg_t *msg, int64_t timestamp)
+{
+  int i = 0;
+  char buffer[24];
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ULTRA_SONIC;
+  msg->buf[i++] = 0;
+  // timestamp
+  stamp64ToBuffer(timestamp, buffer);
 
+  for (int j = 0; j < strlen(buffer); j++)
+  {
+    msg->buf[i++] = buffer[j];
+  }
+
+  msg->len = i;
+
+  return 0;
+}
+int encodeUTReadModeRsp(Msg_t *msg, uint8_t enable, uint8_t mode, int64_t timestamp)
+{
+  int i = 0;
+  char buffer[24];
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ULTRA_SONIC;
+  msg->buf[i++] = enable;
+  msg->buf[i++] = mode;
+  // timestamp
+  stamp64ToBuffer(timestamp, buffer);
+
+  for (int j = 0; j < strlen(buffer); j++)
+  {
+    msg->buf[i++] = buffer[j];
+  }
+
+  msg->len = i;
+
+  return 0;
+}
+int encodeUTModeRsp(Msg_t *msg, uint8_t mode, int64_t timestamp)
+{
+  int i = 0;
+  char buffer[24];
+
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ULTRA_SONIC;
+  msg->buf[i++] = mode;
+
+  // timestamp
+  stamp64ToBuffer(timestamp, buffer);
+
+  for (int j = 0; j < strlen(buffer); j++)
+  {
+    msg->buf[i++] = buffer[j];
+  }
+
+  msg->len = i;
+
+  return 0;
+}
 int encodeSensorN(Msg_t *msg, char *data, int64_t timestamp)
 {
   int i = 0;

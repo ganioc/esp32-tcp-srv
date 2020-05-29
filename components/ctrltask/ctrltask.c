@@ -56,6 +56,35 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
       gStatus.enable = 1;
       gStatus.mode = msg->buf[3];
     }
+    int64_t iTime = getstamp64();
+    encodeUTModeRsp(msg, msg->buf[3], iTime);
+
+    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
+    {
+      ESP_LOGI(TAG, "msg send cmd mode UT %d", msg->len);
+    }
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_STOP_MODE)
+  {
+    gStatus.enable = 0;
+    gStatus.mode = 1;
+    int64_t iTime = getstamp64();
+    encodeUTModeStopRsp(msg, iTime);
+
+    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
+    {
+      ESP_LOGI(TAG, "msg send cmd mode UT %d", msg->len);
+    }
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_READ_MODE)
+  {
+    int64_t iTime = getstamp64();
+    encodeUTReadModeRsp(msg, gStatus.enable, gStatus.mode, iTime);
+
+    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
+    {
+      ESP_LOGI(TAG, "msg send read mode UT %d", msg->len);
+    }
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_RESET)
   {

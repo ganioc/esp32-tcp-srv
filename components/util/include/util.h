@@ -17,10 +17,12 @@
 #define TARGET_ESP32 0x10
 #define TARGET_HOST 0x11
 //
-
+#define UT_STOP_MODE 0x0
 #define UT_WORKING_MODE 0x01
+#define UT_READ_MODE 2
 // mode=1, Send every packet
 // mode=2,  Send every other packet
+
 #define UT_MODE_1 0x1
 #define UT_MODE_2 0x2
 
@@ -47,3 +49,6 @@ int64_t stamp64FromBuffer(char *buf, int len);
 int stamp64ToBuffer(int64_t tm, char *buf);
 int encodeUTReset(Msg_t *msg, uint8_t err, int64_t timestamp);
 int encodeSwitchN(Msg_t *msg, int num_switch, int level, int64_t timestamp);
+int encodeUTModeRsp(Msg_t *msg, uint8_t mode, int64_t timestamp);
+int encodeUTReadModeRsp(Msg_t *msg, uint8_t enable, uint8_t mode, int64_t timestamp);
+int encodeUTModeStopRsp(Msg_t *msg, int64_t timestamp);
