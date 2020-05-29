@@ -94,8 +94,8 @@ info_get_handler(httpd_req_t *req)
   /* Send response with custom headers and body set as the
      * string passed in user context*/
   // const char *resp_str = (const char *)req->user_ctx;
-  char *resp_str = malloc(1024);
-  sprintf(resp_str, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>信息</title><script></script><style>    body {      text-align: center;      font-size: medium;      color: #2ca089;    }    footer {      font-size: small;      color: #2ca089;      text-align: center;    }    a {      color: aquamarine;    }</style></head><body><h2>信息</h2><section><p>ESP32 AP+STA mode</p></section><p>Version:%s</p><p>SSID:%s</p><p>PASS:%s</p><p><a href=\"/\">返回</a></p></body><footer><p>2020 Ruff Team</p></footer></html>", getVersion(), "net", "pass");
+  char *resp_str = malloc(2048);
+  sprintf(resp_str, "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>信息</title><script></script><style>@media all and (min-width:1024px) and (max-device-width: 2600px) { body { font-size: 15pt; } .pic { padding-top: 0%%; } .pic svg { width: 180px; height: 320px; } } @media all and (max-device-width: 500px) { body { font-size: 50pt; } .pic { padding-top: 20%%; } .pic svg { width: 320px; height: 440px; } } @media all and (min-device-width: 500px) and (max-device-width: 710px) { body { font-size: 50pt; } .pic { padding-top: 10%%; } .pic svg { width: 400px; height: 600px; } } @media all and (min-device-width: 710px) and (max-device-width: 1023px) { body { font-size: 20pt; } .pic { padding-top: 10%%; } .pic svg { width: 220px; height: 370px; } } body { text-align: center; color: #2ca089; } .pic { display: block; width: 100%%; } footer { color: #2ca089; } a { color: aquamarine; }</style></head><body><h2>信息</h2><section><p>ESP32 AP+STA mode</p></section><p>Version:%s</p><p>SSID:%s</p><p>PASS:%s</p><p><a href=\"/\">返回</a></p></body><footer><p>2020 Ruff Team</p></footer></html>", getVersion(), "net", "pass");
   httpd_resp_send(req, resp_str, strlen(resp_str));
   free(resp_str);
 

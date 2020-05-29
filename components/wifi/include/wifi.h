@@ -16,6 +16,8 @@
 #define ESP_AP_SSID "ruff-hub-sensor"
 #define ESP_AP_PASS "nanchao123"
 
+#define MAX_SSID_PASS_LEN 24
+
 // Prototypes
 // wifi init
 // void init_softap();
@@ -29,3 +31,11 @@ char *getNewSSID();
 char *getNewPASS();
 
 int getWifiLink();
+
+int validNewSSIDPASS();
+
+int setNewSSID(char *str);
+int setNewPASS(char *str);
+
+void load_new_SSID_PASS();
+int save_new_SSID_PASS(char *ssid, char *pass);

@@ -9,12 +9,17 @@
 #include "esp_log.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 
 #include "include/wifi.h"
 
 static int stateLink = 0;
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
+
+char strNewSSID[MAX_SSID_PASS_LEN];
+char strNewPASS[MAX_SSID_PASS_LEN];
 
 /* The event group allows multiple bits for each event, but we only care about two events:
  * - we are connected to the AP with an IP
@@ -102,6 +107,8 @@ static void event_handler(void *arg, esp_event_base_t event_base,
 }
 void init_sta()
 {
+
+  load_new_SSID_PASS();
 
   s_wifi_event_group = xEventGroupCreate();
   tcpip_adapter_init();
@@ -224,14 +231,110 @@ char *getOriginalPASS()
 {
   return EXAMPLE_ESP_WIFI_PASS;
 }
-// char *getNvSSID()
-// {
-// }
-// char *getNvPASS()
-// {
-// }
+char *getNewSSID()
+{
+  return strNewSSID;
+}
+char *getNewPASS()
+{
+  return strNewPASS;
+}
 
 int getWifiLink()
 {
   return stateLink;
+}
+int setNewSSID(char *str)
+{
+  if (strlen(str) >= MAX_SSID_PASS_LEN)
+  {
+    return -1;
+  }
+  sprintf(strNewSSID, "%s", str);
+  return 0;
+}
+int setNewPASS(char *str)
+{
+  if (strlen(str) >= MAX_SSID_PASS_LEN)
+  {
+    return -1;
+  }
+  sprintf(strNewPASS, "%s", str);
+  return 0;
+}
+int validNewSSIDPASS()
+{
+  if (strlen(strNewPASS) == 0)
+  {
+    return -1;
+  }
+  if (strlen(strNewSSID) == 0)
+  {
+    return -1;
+  }
+  return 0;
+}
+void load_new_SSID_PASS()
+{
+  esp_err_t err;
+  nvs_handle_t my_handle;
+  size_t len;
+  err = nvs_open("storage", NVS_READWRITE, &my_handle);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "load new open storage failed");
+  }
+  else
+  {
+    err = nvs_get_str(my_handle, "newssid", strNewSSID, &len);
+
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "read newssid failed");
+    }
+    printf("newssid read out :%d\n", len);
+
+    err = nvs_get_str(my_handle, "newpass", strNewPASS, &len);
+
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "read newpass failed");
+    }
+    printf("newpass read out :%d\n", len);
+    nvs_close(my_handle);
+
+    printf("print newssid len: %d\n", strlen(strNewSSID));
+    printf("print newpass len: %d\n", strlen(strNewPASS));
+  }
+}
+int save_new_SSID_PASS(char *ssid, char *pass)
+{
+  esp_err_t err;
+  nvs_handle_t my_handle;
+
+  int result = 0;
+  err = nvs_open("storage", NVS_READWRITE, &my_handle);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "open storage failed %x", err);
+    result = -1;
+  }
+  else
+  {
+    err = nvs_set_str(my_handle, "newssid", ssid);
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "save newssid failed");
+      result = -1;
+    }
+    err = nvs_set_str(my_handle, "newpass", pass);
+    if (err != ESP_OK)
+    {
+      ESP_LOGE(TAG, "save newpass failed");
+      result = -1;
+    }
+
+    nvs_close(my_handle);
+  }
+  return result;
 }
