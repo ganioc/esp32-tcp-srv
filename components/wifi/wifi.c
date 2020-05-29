@@ -142,7 +142,7 @@ void init_sta()
           .ssid = ESP_AP_SSID,
           .ssid_len = strlen(ESP_AP_SSID),
           .password = ESP_AP_PASS,
-          .max_connection = 2,
+          .max_connection = 5,
           .authmode = WIFI_AUTH_WPA_WPA2_PSK},
   };
 
