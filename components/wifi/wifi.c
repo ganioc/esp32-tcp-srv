@@ -107,7 +107,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
 }
 void init_sta()
 {
-
+  int result = 0;
   load_new_SSID_PASS();
 
   s_wifi_event_group = xEventGroupCreate();
@@ -135,7 +135,14 @@ void init_sta()
           .ssid = EXAMPLE_ESP_WIFI_SSID,
           .password = EXAMPLE_ESP_WIFI_PASS},
   };
-
+  //   (unsigned char *)getNewSSID(),
+  // (unsigned char *)getNewPASS()
+  //   EXAMPLE_ESP_WIFI_PASS},
+  if (validNewSSIDPASS() == 0)
+  {
+    sprintf((char *)wifi_config.sta.ssid, "%s", getNewSSID());
+    sprintf((char *)wifi_config.sta.password, "%s", getNewPASS());
+  }
   // ap
   wifi_config_t ap_config = {
       .ap = {
@@ -165,22 +172,45 @@ void init_sta()
      * happened. */
   if (bits & WIFI_CONNECTED_BIT)
   {
-    ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+    if (validNewSSIDPASS() == 0)
+    {
+      ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+               getNewSSID(), getNewPASS());
+    }
+    else
+    {
+      ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+               EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+    }
   }
   else if (bits & WIFI_FAIL_BIT)
   {
-    ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+    if (validNewSSIDPASS() == 0)
+    {
+      ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+               getNewSSID(), getNewPASS());
+    }
+    else
+    {
+      ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+               EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+    }
+    result = -1;
   }
   else
   {
     ESP_LOGE(TAG, "UNEXPECTED EVENT");
+    result = -1;
   }
 
   ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
   ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
   vEventGroupDelete(s_wifi_event_group);
+
+  if (result = -1)
+  {
+    re_init_sta();
+  }
 }
 
 // void init_softap()
