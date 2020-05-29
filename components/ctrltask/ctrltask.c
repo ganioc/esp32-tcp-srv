@@ -59,8 +59,7 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
       gStatus.enable = 1;
       gStatus.mode = msg->buf[3];
     }
-    int64_t iTime = getstamp64();
-    encodeUTModeRsp(msg, msg->buf[3], iTime);
+    encodeUTModeRsp(msg, msg->buf[3], 0);
 
     if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
     {
@@ -71,8 +70,7 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   {
     gStatus.enable = 0;
     gStatus.mode = 1;
-    int64_t iTime = getstamp64();
-    encodeUTModeStopRsp(msg, iTime);
+    encodeUTModeStopRsp(msg, 0);
 
     if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
     {
@@ -81,8 +79,8 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_READ_MODE)
   {
-    int64_t iTime = getstamp64();
-    encodeUTReadModeRsp(msg, gStatus.enable, gStatus.mode, iTime);
+
+    encodeUTReadModeRsp(msg, gStatus.enable, gStatus.mode, 0);
 
     if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
     {
