@@ -27,3 +27,5 @@ void off_led_stat();
 void on_ut_pwr();
 void off_ut_pwr();
 void conf_gpio();
+int get_din1();
+int get_din2();

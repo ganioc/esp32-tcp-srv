@@ -17,6 +17,9 @@ extern SemaphoreHandle_t xSemaphore;
 extern QueueHandle_t uartQueue;
 extern xQueueHandle gpio_evt_queue;
 
+extern int stateDin1;
+extern int stateDin2;
+
 static const char *TAG = "ctrltask";
 
 GlobalStatus_t gStatus = {
@@ -259,6 +262,7 @@ static void ctrl_task()
     }
 
     // check gpio interrupt
+    /*
     if (xQueueReceive(gpio_evt_queue, &io_num, 50 / portTICK_RATE_MS))
     {
       int64_t iTime = getstamp64();
@@ -282,6 +286,25 @@ static void ctrl_task()
       }
       encodeSwitchN(&msg, num_switch, level_switch, iTime);
       broadcast(&msg);
+    }
+    */
+    level_switch = get_din1();
+    if (level_switch != stateDin1)
+    {
+      int64_t iTime = getstamp64();
+      printf("DIN1 intr, val: %d\n", level_switch);
+      encodeSwitchN(&msg, 1, level_switch, iTime);
+      broadcast(&msg);
+      stateDin1 = level_switch;
+    }
+    level_switch = get_din2();
+    if (level_switch != stateDin2)
+    {
+      int64_t iTime = getstamp64();
+      printf("DIN2 intr, val: %d\n", level_switch);
+      encodeSwitchN(&msg, 2, level_switch, iTime);
+      broadcast(&msg);
+      stateDin2 = level_switch;
     }
   }
 }

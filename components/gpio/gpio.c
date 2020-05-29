@@ -10,10 +10,13 @@
 
 xQueueHandle gpio_evt_queue = NULL;
 
+int stateDin1 = 0;
+int stateDin2 = 0;
+
 static void IRAM_ATTR gpio_isr_handler(void *arg)
 {
   uint32_t gpio_num = (uint32_t)arg;
-  xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
+  // xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
 void print_gpio()
@@ -64,6 +67,9 @@ void conf_gpio()
   gpio_isr_handler_add(GPIO_DIN_1, gpio_isr_handler, (void *)GPIO_DIN_1);
   //hook isr handler for specific gpio pin
   gpio_isr_handler_add(GPIO_DIN_2, gpio_isr_handler, (void *)GPIO_DIN_2);
+
+  stateDin1 = get_din1();
+  stateDin2 = get_din2();
 }
 void on_ut_pwr()
 {
@@ -88,4 +94,14 @@ void on_led_stat()
 void off_led_stat()
 {
   gpio_set_level(GPIO_LED_STAT, 1);
+}
+int get_din1()
+{
+  int level_switch = gpio_get_level(GPIO_DIN_1);
+  return level_switch;
+}
+int get_din2()
+{
+  int level_switch = gpio_get_level(GPIO_DIN_2);
+  return level_switch;
 }
