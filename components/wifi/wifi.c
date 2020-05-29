@@ -124,6 +124,7 @@ void init_sta()
   tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA);
   tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &static_IP_info);
 
+  // wifi_init
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
@@ -158,7 +159,7 @@ void init_sta()
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
-  ESP_LOGI(TAG, "wifi_init_sta finished.");
+  ESP_LOGI(TAG, "wifi_init_sta config method finished.");
 
   /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
@@ -207,9 +208,103 @@ void init_sta()
   ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
   vEventGroupDelete(s_wifi_event_group);
 
-  if (result = -1)
+  if (result == -1)
   {
-    re_init_sta();
+    // connect failure
+    // delay 2 minutes then
+    if (validNewSSIDPASS() == 0)
+    { // try to do some reconnect
+      esp_wifi_stop();
+      esp_wifi_deinit();
+      ESP_LOGI(TAG, "stop wifi , wait 5 seconds and do reconnect()");
+      vTaskDelay(5000 / portTICK_PERIOD_MS);
+      reconnect_with_old_ssidpass();
+    }
+    else
+    {
+      printf("wait 120 s to restart\n");
+      vTaskDelay(TIME_BEFORE_RESTART / portTICK_PERIOD_MS);
+      printf("Restarting now.\n");
+      fflush(stdout);
+      esp_restart();
+    }
+  }
+}
+void reconnect_with_old_ssidpass()
+{
+  int result = 0;
+  s_wifi_event_group = xEventGroupCreate();
+
+  // wifi_init
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+  ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
+  ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL));
+
+  wifi_config_t wifi_config = {
+      .sta = {
+          .ssid = EXAMPLE_ESP_WIFI_SSID,
+          .password = EXAMPLE_ESP_WIFI_PASS},
+  };
+  // ap
+  wifi_config_t ap_config = {
+      .ap = {
+          .ssid = ESP_AP_SSID,
+          .ssid_len = strlen(ESP_AP_SSID),
+          .password = ESP_AP_PASS,
+          .max_connection = 5,
+          .authmode = WIFI_AUTH_WPA_WPA2_PSK},
+  };
+
+  ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+  ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
+  ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_config));
+  ESP_ERROR_CHECK(esp_wifi_start());
+
+  ESP_LOGI(TAG, "reconnect - wifi_init_sta finished.");
+
+  /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
+     * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
+  EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+                                         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+                                         pdFALSE,
+                                         pdFALSE,
+                                         portMAX_DELAY);
+
+  /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
+     * happened. */
+  if (bits & WIFI_CONNECTED_BIT)
+  {
+
+    ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+  }
+  else if (bits & WIFI_FAIL_BIT)
+  {
+
+    ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS);
+
+    result = -1;
+  }
+  else
+  {
+    ESP_LOGE(TAG, "UNEXPECTED EVENT");
+    result = -1;
+  }
+
+  ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
+  ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
+  vEventGroupDelete(s_wifi_event_group);
+
+  if (result == -1)
+  {
+    printf("wait 120 s to restart\n");
+    vTaskDelay(TIME_BEFORE_RESTART / portTICK_PERIOD_MS);
+    printf("reconnect - Restarting now.\n");
+    fflush(stdout);
+    esp_restart();
   }
 }
 
@@ -365,6 +460,11 @@ int save_new_SSID_PASS(char *ssid, char *pass)
     }
 
     nvs_close(my_handle);
+  }
+  if (result == 0)
+  {
+    setNewSSID(ssid);
+    setNewPASS(pass);
   }
   return result;
 }

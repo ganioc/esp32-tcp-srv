@@ -18,6 +18,9 @@
 
 #define MAX_SSID_PASS_LEN 24
 
+// 2 minutes
+#define TIME_BEFORE_RESTART 120000
+
 // Prototypes
 // wifi init
 // void init_softap();
@@ -39,3 +42,5 @@ int setNewPASS(char *str);
 
 void load_new_SSID_PASS();
 int save_new_SSID_PASS(char *ssid, char *pass);
+
+void reconnect_with_old_ssidpass();
