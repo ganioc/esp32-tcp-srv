@@ -86,6 +86,13 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   {
     printf("ESP32 reset\n");
     ESP_LOGE(TAG, "ESP32 Restarting now.\n");
+    encodeESP32Reset(msg);
+    if (xQueueSend(queue, msg, 100 / portTICK_RATE_MS))
+    {
+      ESP_LOGI(TAG, "msg send ESP32 reset %d", msg->len);
+    }
+
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
     fflush(stdout);
     esp_restart();
   }

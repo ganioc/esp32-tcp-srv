@@ -60,3 +60,4 @@ int encodeUTModeStopRsp(Msg_t *msg, uint8_t err);
 int encodeSwitchRead(Msg_t *msg, uint8_t switch_num, uint8_t err);
 int encodeUnknowCmd(Msg_t *msg, uint8_t target, uint8_t cmd, uint8_t err);
 int encodeVersionRead(Msg_t *msg);
+int encodeESP32Reset(Msg_t *msg);

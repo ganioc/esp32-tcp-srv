@@ -188,6 +188,19 @@ int encodeUTReadModeRsp(Msg_t *msg, uint8_t enable, uint8_t mode, uint8_t err)
 
   return 0;
 }
+int encodeESP32Reset(Msg_t *msg)
+{
+  int i = 0;
+
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ESP32;
+  msg->buf[i++] = 0;
+  msg->buf[i++] = ESP32_RESET;
+
+  msg->len = i;
+  return 0;
+}
+
 int encodeVersionRead(Msg_t *msg)
 {
   int i = 0;
