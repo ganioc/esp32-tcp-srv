@@ -53,7 +53,7 @@ static void socket_task(void *pvParameters)
     fd_set rfds;
     struct timeval tv = {
         .tv_sec = 0,
-        .tv_usec = 200000,
+        .tv_usec = 50000,
     };
     FD_ZERO(&rfds);
     FD_SET(sock, &rfds);
@@ -175,7 +175,7 @@ static void socket_task(void *pvParameters)
     /////////////////////////
     // receive from tx_queue
     /////////////////////////
-    if (xQueueReceive(tx_queue, &msg, 100 / portTICK_RATE_MS))
+    if (xQueueReceive(tx_queue, &msg, 50 / portTICK_RATE_MS))
     {
       printf("<-- msg %d\n", msg.len);
       int send_len = create_frame(rx_buffer, msg);
