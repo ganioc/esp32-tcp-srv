@@ -60,46 +60,25 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
       gStatus.mode = msg->buf[3];
     }
     encodeUTModeRsp(msg, msg->buf[3], 0);
-
-    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
-    {
-      ESP_LOGI(TAG, "msg send cmd mode UT %d", msg->len);
-    }
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_STOP_MODE)
   {
     gStatus.enable = 0;
     gStatus.mode = 1;
     encodeUTModeStopRsp(msg, 0);
-
-    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
-    {
-      ESP_LOGI(TAG, "msg send cmd mode UT %d", msg->len);
-    }
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_READ_MODE)
   {
 
     encodeUTReadModeRsp(msg, gStatus.enable, gStatus.mode, 0);
-
-    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
-    {
-      ESP_LOGI(TAG, "msg send read mode UT %d", msg->len);
-    }
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ULTRA_SONIC && msg->buf[2] == UT_RESET)
   {
     printf("UT reset\n");
     off_ut_pwr();
 
-    int64_t iTime = getstamp64();
-    encodeUTReset(msg, 0, iTime);
+    encodeUTReset(msg, 0);
     // send back feedback
-    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
-    {
-      ESP_LOGI(TAG, "msg send reset UT %d", msg->len);
-    }
-
     vTaskDelay(500 / portTICK_PERIOD_MS);
     on_ut_pwr();
   }
@@ -147,15 +126,6 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     }
     printf("\n");
     msg->len = index;
-    // send back response
-    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
-    {
-      printf("set timestamp msg send ->\n");
-    }
-    else
-    {
-      printf("set timestamp msg send  Failed ->\n");
-    }
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_GET_TIMESTAMP)
   {
@@ -178,19 +148,36 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     }
     printf("\n");
     msg->len = index;
-    // send back response
-    if (xQueueSend(queue, msg, 50 / portTICK_RATE_MS))
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_SWITCH && msg->buf[2] == SWITCH_READ_LEVEL)
+  {
+    if (msg->buf[3] == TARGET_SWITCH_1 || msg->buf[3] == TARGET_SWITCH_2)
     {
-      printf("get timestamp msg send ->\n");
+      encodeSwitchRead(msg, msg->buf[3], 0);
     }
     else
     {
-      printf("get timestamp msg send  Failed ->\n");
+      printf("Unrecognized cmd\n");
+      encodeSwitchRead(msg, msg->buf[3], 1);
     }
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_GET_VERSION)
+  {
+    printf("getVersion()\n");
+    encodeVersionRead(msg);
   }
   else
   {
+    encodeUnknowCmd(msg, msg->buf[1], msg->buf[2], 1);
     printf("Unrecognized cmd\n");
+  }
+  if (xQueueSend(queue, msg, 100 / portTICK_RATE_MS))
+  {
+    ESP_LOGI(TAG, "msg send cmd mode UT %d", msg->len);
+  }
+  else
+  {
+    ESP_LOGE(TAG, "msg send  Failed ->\n");
   }
 }
 
@@ -238,8 +225,6 @@ void check_rx_queues()
  */
 static void ctrl_task()
 {
-  uint32_t io_num;
-  int num_switch = 0;
   int level_switch;
   while (1)
   {

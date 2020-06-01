@@ -1,8 +1,10 @@
+#include <string.h>
 #include "esp_event.h"
 #include "esp_log.h"
 #include "./include/util.h"
 #include "../queue/include/queue.h"
-#include <string.h>
+#include "../http/include/http.h"
+#include "../gpio/include/gpio.h"
 
 static const char *TAG = "Util";
 static uint16_t frame_seq = 0x01;
@@ -94,7 +96,7 @@ int64_t getstamp64()
 
   return intTime;
 }
-int encodeUTReset(Msg_t *msg, uint8_t err, int64_t timestamp)
+int encodeUTReset(Msg_t *msg, uint8_t err)
 {
   int i = 0;
 
@@ -126,6 +128,38 @@ int encodeSwitchN(Msg_t *msg, int num_switch, int level, int64_t timestamp)
 
   return 0;
 }
+int encodeUnknowCmd(Msg_t *msg, uint8_t target, uint8_t cmd, uint8_t err)
+{
+  int i = 0;
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = target;
+  msg->buf[i++] = err;
+  msg->buf[i++] = cmd;
+
+  msg->len = i;
+  return 0;
+}
+
+int encodeSwitchRead(Msg_t *msg, uint8_t switch_num, uint8_t err)
+{
+  int i = 0;
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_SWITCH;
+  msg->buf[i++] = err;
+  msg->buf[i++] = switch_num;
+  if (switch_num == TARGET_SWITCH_1)
+  {
+    msg->buf[i++] = get_din1();
+  }
+  else if (switch_num == TARGET_SWITCH_2)
+  {
+    msg->buf[i++] = get_din2();
+  }
+
+  msg->len = i;
+  return 0;
+}
+
 int encodeUTModeStopRsp(Msg_t *msg, uint8_t err)
 {
   int i = 0;
@@ -146,12 +180,31 @@ int encodeUTReadModeRsp(Msg_t *msg, uint8_t enable, uint8_t mode, uint8_t err)
   msg->buf[i++] = CMD_RESPONSE;
   msg->buf[i++] = TARGET_ULTRA_SONIC;
   msg->buf[i++] = err;
-  msg->buf[i++] = 2;
+  msg->buf[i++] = UT_READ_MODE;
   msg->buf[i++] = enable;
   msg->buf[i++] = mode;
 
   msg->len = i;
 
+  return 0;
+}
+int encodeVersionRead(Msg_t *msg)
+{
+  int i = 0;
+
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ESP32;
+  msg->buf[i++] = 0;
+  msg->buf[i++] = ESP32_GET_VERSION;
+
+  char *str = getVersion();
+
+  for (int j = 0; j < strlen(str); j++)
+  {
+    msg->buf[i++] = str[j];
+  }
+
+  msg->len = i;
   return 0;
 }
 int encodeUTModeRsp(Msg_t *msg, uint8_t mode, uint8_t err)
