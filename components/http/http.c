@@ -26,7 +26,7 @@ char *getVersion()
 #ifdef PROJECT_VER
   return PROJECT_VER;
 #else
-  return "1.0.1";
+  return "1.0.2";
 #endif
 }
 

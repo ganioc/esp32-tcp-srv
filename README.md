@@ -15,8 +15,12 @@ See the README.md file in the upper level 'examples' directory for more informat
 
 ## MessageQueue in FreeRTOS
 
+## Version
 
+```
+1.0.2 - basic functions tested
+      - 192.168.4.1 AP will bring a webpage to set new SSID, PASS
 
-
+```
 
 
