@@ -83,7 +83,6 @@ void app_main()
         // printf(". %d\n", cnt++);
         if (cnt % 2 == 1)
         {
-            // on_led_stat();
             if (getWifiLink(0 == 1))
             {
                 on_led_link();
@@ -91,7 +90,6 @@ void app_main()
         }
         else
         {
-            // off_led_stat();
             if (getWifiLink(0 == 1))
             {
                 off_led_link();
@@ -100,7 +98,4 @@ void app_main()
 
         vTaskDelay(500 / portTICK_PERIOD_MS);
     }
-    // printf("Restarting now.\n");
-    // fflush(stdout);
-    // esp_restart();
 }

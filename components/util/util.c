@@ -144,9 +144,8 @@ int encodeSwitchRead(Msg_t *msg, uint8_t switch_num, uint8_t err)
 {
   int i = 0;
   msg->buf[i++] = CMD_RESPONSE;
-  msg->buf[i++] = TARGET_SWITCH;
-  msg->buf[i++] = err;
   msg->buf[i++] = switch_num;
+  msg->buf[i++] = err;
   if (switch_num == TARGET_SWITCH_1)
   {
     msg->buf[i++] = get_din1();

@@ -14,10 +14,9 @@
 #define TARGET_ULTRA_SONIC 0x01
 #define TARGET_SWITCH_1 0x02
 #define TARGET_SWITCH_2 0x03
-
 #define TARGET_ESP32 0x10
 #define TARGET_HOST 0x11
-#define TARGET_SWITCH 0x12
+
 //
 #define UT_STOP_MODE 0x0
 #define UT_WORKING_MODE 0x01

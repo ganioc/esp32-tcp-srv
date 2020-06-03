@@ -156,17 +156,13 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     printf("\n");
     msg->len = index;
   }
-  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_SWITCH && msg->buf[2] == SWITCH_READ_LEVEL)
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_SWITCH_1 && msg->buf[2] == SWITCH_READ_LEVEL)
   {
-    if (msg->buf[3] == TARGET_SWITCH_1 || msg->buf[3] == TARGET_SWITCH_2)
-    {
-      encodeSwitchRead(msg, msg->buf[3], 0);
-    }
-    else
-    {
-      printf("Unrecognized cmd\n");
-      encodeSwitchRead(msg, msg->buf[3], 1);
-    }
+    encodeSwitchRead(msg, TARGET_SWITCH_1, 0);
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_SWITCH_2 && msg->buf[2] == SWITCH_READ_LEVEL)
+  {
+    encodeSwitchRead(msg, TARGET_SWITCH_2, 0);
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_GET_VERSION)
   {
