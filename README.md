@@ -6,6 +6,10 @@ See the README.md file in the upper level 'examples' directory for more informat
 
 
 # Functions
+## OTA
+How to upgrading?
+
+
 ## GPIO settings
 
 

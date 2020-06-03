@@ -23,8 +23,7 @@
 
 // Prototypes
 // wifi init
-// void init_softap();
-void init_sta();
+void init_staap();
 
 char *getSSID();
 char *getPASS();

@@ -54,7 +54,7 @@ void app_main()
 
     // turn on Wifi
     printf("\nTurn on wifi station\n");
-    init_sta();
+    init_staap();
 
     // tcp server on
     printf("\nTurn on tcp server\n");
