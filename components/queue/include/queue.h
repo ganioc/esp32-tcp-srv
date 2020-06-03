@@ -9,7 +9,7 @@
 
 #define QUEUE_LENGTH 3
 #define MSG_LEN 32
-#define MAX_MSG_NUM 4
+#define MAX_MSG_NUM 6
 
 typedef struct QueueManager
 {

@@ -21,8 +21,6 @@
 #define UT_STOP_MODE 0x0
 #define UT_WORKING_MODE 0x01
 #define UT_READ_MODE 0x03
-// mode=1, Send every packet
-// mode=2,  Send every other packet
 
 #define SWITCH_READ_LEVEL 0x01
 

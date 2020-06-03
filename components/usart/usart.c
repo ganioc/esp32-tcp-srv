@@ -104,13 +104,6 @@ static void usart_task()
         }
       }
     }
-
-    // check switch 1, DIN1
-    
-
-    // check switch 2, DIN2
-
-
   }
   vTaskDelete(NULL);
 }

@@ -60,10 +60,9 @@ static void socket_task(void *pvParameters)
     /////////////////////////
     // receive from  socket
     /////////////////////////
-    // 200 ms timeout
+    // 50 ms timeout
     s = select(sock + 1, &rfds, NULL, NULL, &tv);
-    // len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-    // Error occurred during receiving
+
     if (s < 0)
     {
       ESP_LOGE(TAG, "recv failed: errno %d", errno);
@@ -152,23 +151,6 @@ static void socket_task(void *pvParameters)
               break;
             }
           }
-
-          // rx_buffer[len] = 0;
-          // msg.len = len;
-          // for (int j = 0; j < len; j++)
-          // {
-          //   msg.buf[j] = rx_buffer[j];
-          // }
-
-          // xQueueSend(rx_queue, &msg, portMAX_DELAY);
-
-          /*          
-          int err = send(sock, rx_buffer, len, 0);
-          if (err < 0)
-          {
-            ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-            break;
-          } */
         }
       }
     }
@@ -198,12 +180,9 @@ static void socket_task(void *pvParameters)
   // socket is closed?
   remove_queue(sock);
 
-  // if (len != 0)
-  // {
   ESP_LOGE(TAG, "Shutting down conn...");
   shutdown(sock, 0);
   close(sock);
-  // }
 
   vTaskDelete(NULL);
 }
