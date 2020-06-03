@@ -140,6 +140,29 @@ int encodeUnknowCmd(Msg_t *msg, uint8_t target, uint8_t cmd, uint8_t err)
   return 0;
 }
 
+int encodeESP32SetTimestamp(Msg_t *msg, int64_t tm)
+{
+  char buffer[32];
+  printf("\ntm is:%lld\n", tm);
+  stamp64ToBuffer(tm, buffer);
+
+  printf("buffer length: %d\n", strlen(buffer));
+
+  int index = 0;
+  msg->buf[index++] = 0x02;
+  msg->buf[index++] = TARGET_ESP32;
+  msg->buf[index++] = 0;
+  msg->buf[index++] = ESP32_SET_TIMESTAMP;
+  for (int i = 0; i < strlen(buffer); i++)
+  {
+    msg->buf[index++] = buffer[i];
+    printf("%x ", buffer[i]);
+  }
+  printf("\n");
+  msg->len = index;
+  return 0;
+}
+
 int encodeSwitchRead(Msg_t *msg, uint8_t switch_num, uint8_t err)
 {
   int i = 0;

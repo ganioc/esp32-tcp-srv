@@ -99,9 +99,6 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_SET_TIMESTAMP)
   {
     int64_t tm = 0;
-    int err = 0;
-    int index = 0;
-    int i;
 
     printf("ESP32 set timestamp\n");
     if (msg->len >= 12)
@@ -109,30 +106,13 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
       tm = stamp64FromBuffer((char *)&msg->buf[3], msg->len - 3);
       printf("tm is %lld\n", tm);
       setstamp64(tm / 1000, (tm % 1000) * 1000);
+      encodeESP32SetTimestamp(msg, tm);
     }
     else
     {
-      err = 1;
       printf("Wrong packet length: %d\n", msg->len);
+      encodeUnknowCmd(msg, msg->buf[1], msg->buf[2], 1);
     }
-    tm = getstamp64();
-    printf("\ntm is:%lld\n", tm);
-    stamp64ToBuffer(tm, buffer);
-
-    printf("buffer length: %d\n", strlen(buffer));
-
-    index = 0;
-    msg->buf[index++] = 0x02;
-    msg->buf[index++] = TARGET_ESP32;
-    msg->buf[index++] = err;
-    msg->buf[index++] = ESP32_SET_TIMESTAMP;
-    for (i = 0; i < strlen(buffer); i++)
-    {
-      msg->buf[index++] = buffer[i];
-      printf("%x ", buffer[i]);
-    }
-    printf("\n");
-    msg->len = index;
   }
   else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_GET_TIMESTAMP)
   {
