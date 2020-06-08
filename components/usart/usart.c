@@ -67,8 +67,12 @@ static int is_valid(int counter, int mode)
 static void usart_task()
 {
 
+  CHECK_ERROR_CODE(esp_task_wdt_add(NULL), ESP_OK);
+
   while (1)
   {
+    //Comment this line to trigger a TWDT timeout
+    CHECK_ERROR_CODE(esp_task_wdt_reset(), ESP_OK);
 
     int len = uart_read_bytes(UART_NUM_1, datausart, BUF_SIZE, 130 / portTICK_RATE_MS);
 
@@ -126,6 +130,9 @@ void init_usart()
 
   printf("\nCreate uart queue\n");
   uartQueue = create_queue();
+
+  // CHECK_ERROR_CODE(esp_task_wdt_add(NULL), ESP_OK);
+  // CHECK_ERROR_CODE(esp_task_wdt_status(NULL), ESP_OK);
 
   xTaskCreate(usart_task, "usart_task", 2048, NULL, 4, NULL);
 }

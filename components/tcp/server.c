@@ -245,6 +245,8 @@ static void tcp_server_task(void *pvParameters)
       xTaskCreate(socket_task, "conn", 4096, &sock, 6, NULL);
     }
 
+    //Comment this line to trigger a TWDT timeout
+
     // To start a new task here
 
     if (sock != -1)
@@ -259,5 +261,6 @@ static void tcp_server_task(void *pvParameters)
 
 void init_server()
 {
+
   xTaskCreate(tcp_server_task, "tcp_server", 4096, NULL, 5, NULL);
 }

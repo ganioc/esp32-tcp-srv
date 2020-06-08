@@ -10,6 +10,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "nvs_flash.h"
+#include "esp_task_wdt.h"
 
 #include "../components/gpio/include/gpio.h"
 #include "../components/wifi/include/wifi.h"
@@ -18,6 +19,9 @@
 #include "../components/queue/include/queue.h"
 #include "../components/ctrltask/include/ctrltask.h"
 #include "../components/http/include/http.h"
+#include "../components/util/include/util.h"
+
+#define TWDT_TIMEOUT_S 8
 
 void app_main()
 {
@@ -35,6 +39,9 @@ void app_main()
 
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+
+    printf("Initialize TWDT\n");
+
     // init queue
     printf("\nConfig queue\n");
     init_queue();
@@ -62,6 +69,9 @@ void app_main()
 
     // http server on
     init_http();
+
+    //Initialize or reinitialize TWDT
+    CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
 
     // turn on uart task
     printf("\ninit usart\n");

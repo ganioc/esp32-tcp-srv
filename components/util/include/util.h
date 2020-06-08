@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include "freertos/FreeRTOS.h"
 #include "../../queue/include/queue.h"
+#include "esp_task_wdt.h"
 
 #define CMD_REQUEST 0x01
 #define CMD_RESPONSE 0x02
@@ -40,6 +41,14 @@
 #define STATE_LEN1 0x03
 #define STATE_LEN2 0x04
 #define STATE_CONTENT 0x05
+
+#define CHECK_ERROR_CODE(returned, expected) ({ \
+  if (returned != expected)                     \
+  {                                             \
+    printf("TWDT ERROR\n");                     \
+    abort();                                    \
+  }                                             \
+})
 
 int64_t getstamp64();
 int setstamp64(int64_t sec, int64_t usec);

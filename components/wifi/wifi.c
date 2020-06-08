@@ -95,8 +95,8 @@ void init_staap()
   tcpip_adapter_init();
   // to use static IP
   tcpip_adapter_ip_info_t static_IP_info;
-  IP4_ADDR(&static_IP_info.ip, 192, 168, 32, 108);
-  IP4_ADDR(&static_IP_info.gw, 192, 168, 32, 1);
+  IP4_ADDR(&static_IP_info.ip, 192, 168, 34, 108);
+  IP4_ADDR(&static_IP_info.gw, 192, 168, 34, 1);
   IP4_ADDR(&static_IP_info.netmask, 255, 255, 255, 0);
 
   ESP_ERROR_CHECK(esp_event_loop_create_default());

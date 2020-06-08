@@ -209,8 +209,12 @@ void check_rx_queues()
 static void ctrl_task()
 {
   int level_switch;
+  CHECK_ERROR_CODE(esp_task_wdt_add(NULL), ESP_OK);
+
   while (1)
   {
+    //Comment this line to trigger a TWDT timeout
+    CHECK_ERROR_CODE(esp_task_wdt_reset(), ESP_OK);
     ////////////////////////
     // to check rx queue, change global status
     // check_rx_queues();
