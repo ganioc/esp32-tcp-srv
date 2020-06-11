@@ -43,6 +43,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
   {
     if (s_retry_num < EXAMPLE_ESP_MAXIMUM_RETRY)
     {
+      vTaskDelay(2000 / portTICK_PERIOD_MS);
       esp_wifi_connect();
       s_retry_num++;
       ESP_LOGI(TAG, "retry to connect to the AP");
