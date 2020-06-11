@@ -89,18 +89,19 @@ void app_main()
     int cnt = 0;
     while (1)
     {
+
         cnt++;
         // printf(". %d\n", cnt++);
         if (cnt % 2 == 1)
         {
-            if (getWifiLink(0 == 1))
+            if (getWifiLink())
             {
                 on_led_link();
             }
         }
         else
         {
-            if (getWifiLink(0 == 1))
+            if (getWifiLink())
             {
                 off_led_link();
             }

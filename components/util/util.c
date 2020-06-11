@@ -114,7 +114,7 @@ int encodeSwitchN(Msg_t *msg, int num_switch, int level, int64_t timestamp)
   int i = 0;
   char buffer[24];
   msg->buf[i++] = CMD_NOTIFICATION;
-  msg->buf[i++] = num_switch;
+  msg->buf[i++] = num_switch + 1;
   msg->buf[i++] = level;
   // timestamp
   stamp64ToBuffer(timestamp, buffer);

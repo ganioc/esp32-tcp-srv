@@ -13,6 +13,7 @@
 #include "nvs_flash.h"
 
 #include "include/wifi.h"
+#include "../gpio/include/gpio.h"
 
 static int stateLink = 0;
 /* FreeRTOS event group to signal when we are connected*/
@@ -49,9 +50,15 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     else
     {
       xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+
+      ESP_LOGI(TAG, "To restart after 5 seconds");
+      vTaskDelay(10000 / portTICK_PERIOD_MS);
+      esp_restart();
     }
     ESP_LOGI(TAG, "connect to the AP fail");
     stateLink = 0;
+    //turn off the led link
+    off_led_link();
   }
   else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
   {
@@ -183,12 +190,12 @@ void init_staap()
     result = -1;
   }
 
-  ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
-  ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
-  vEventGroupDelete(s_wifi_event_group);
-
   if (result == -1)
   {
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
+    vEventGroupDelete(s_wifi_event_group);
+
     // connect failure
     // delay 2 minutes then
     if (validNewSSIDPASS() == 0)
@@ -273,12 +280,12 @@ void reconnect_with_old_ssidpass()
     result = -1;
   }
 
-  ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
-  ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
-  vEventGroupDelete(s_wifi_event_group);
-
   if (result == -1)
   {
+    ESP_ERROR_CHECK(esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler));
+    ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
+    vEventGroupDelete(s_wifi_event_group);
+
     printf("wait 120 s to restart\n");
     vTaskDelay(TIME_BEFORE_RESTART / portTICK_PERIOD_MS);
     printf("reconnect - Restarting now.\n");
