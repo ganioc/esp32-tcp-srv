@@ -47,19 +47,19 @@ static void event_handler(void *arg, esp_event_base_t event_base,
       esp_wifi_connect();
       s_retry_num++;
       ESP_LOGI(TAG, "retry to connect to the AP");
+      stateLink = 0;
+      //turn off the led link
+      off_led_link();
     }
     else
     {
       xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
 
-      ESP_LOGI(TAG, "To restart after 5 seconds");
-      vTaskDelay(10000 / portTICK_PERIOD_MS);
+      ESP_LOGI(TAG, "To restart after 15 seconds");
+      vTaskDelay(15000 / portTICK_PERIOD_MS);
       esp_restart();
     }
     ESP_LOGI(TAG, "connect to the AP fail");
-    stateLink = 0;
-    //turn off the led link
-    off_led_link();
   }
   else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
   {
