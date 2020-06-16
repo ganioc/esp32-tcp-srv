@@ -8,7 +8,7 @@
 #include "freertos/task.h"
 
 #define QUEUE_LENGTH 3
-#define MSG_LEN 32
+#define MSG_LEN 64
 #define MAX_MSG_NUM 6
 
 typedef struct QueueManager
