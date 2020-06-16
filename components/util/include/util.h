@@ -69,3 +69,5 @@ int encodeVersionRead(Msg_t *msg);
 int encodeESP32Reset(Msg_t *msg);
 int encodeESP32SetTimestamp(Msg_t *msg, int64_t tm);
 int encodeESP32GetTimestamp(Msg_t *msg);
+
+char *getVersion();

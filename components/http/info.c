@@ -15,6 +15,7 @@
 
 #include "./include/http.h"
 #include "../wifi/include/wifi.h"
+#include "../util/include/util.h"
 
 static const char *TAG = "HTTP info";
 

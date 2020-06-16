@@ -24,7 +24,7 @@
 #define MAX_SSID_PASS_LEN 24
 
 // 2 minutes
-#define TIME_BEFORE_RESTART 120000
+#define TIME_BEFORE_RESTART 30000
 
 // Prototypes
 // wifi init

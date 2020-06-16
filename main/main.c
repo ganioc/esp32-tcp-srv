@@ -11,6 +11,7 @@
 #include "esp_spi_flash.h"
 #include "nvs_flash.h"
 #include "esp_task_wdt.h"
+#include "esp_ota_ops.h"
 
 #include "../components/gpio/include/gpio.h"
 #include "../components/wifi/include/wifi.h"
@@ -23,9 +24,14 @@
 
 #define TWDT_TIMEOUT_S 8
 
+char VERSION[32];
+
 void app_main()
 {
+    const esp_app_desc_t *app_desc = esp_ota_get_app_description();
     printf("Hello world!\n");
+    printf("version %s\n", app_desc->version);
+    sprintf(VERSION, "%s", app_desc->version);
 
     /* Print chip information */
     esp_chip_info_t chip_info;

@@ -2,4 +2,3 @@
 
 void init_http();
 
-char *getVersion();

@@ -11,6 +11,13 @@ static uint16_t frame_seq = 0x01;
 
 static int LOGEN = 1;
 
+extern char VERSION[];
+
+char *getVersion()
+{
+  return VERSION;
+}
+
 int64_t stamp64FromBuffer(char *buf, int len)
 {
   char ch[2];
