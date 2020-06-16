@@ -1,6 +1,7 @@
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_event.h"
 #include "esp_event_loop.h"
@@ -21,10 +22,33 @@
 
 #define BUFFSIZE 1024
 #define HASH_LEN 32 /* SHA-256 digest length */
+#define BIT_0 (1 << 0)
 
 static const char *TAG = "ota_client";
 /*an ota data write buffer ready to write to the flash*/
 static char ota_write_data[BUFFSIZE + 1] = {0};
+static char OTA_URL[64] = {0};
+static uint8_t OTA_STATUS = 0;
+
+// Declare a variable to hold the created event group.
+EventGroupHandle_t xCreatedEventGroup;
+
+int set_ota_url(char *p)
+{
+  sprintf(OTA_URL, "%s", p);
+  return 0;
+}
+
+uint8_t get_ota_status()
+{
+  return OTA_STATUS;
+}
+
+int trigure_ota_event()
+{
+  xEventGroupSetBits(xCreatedEventGroup, BIT_0);
+  return 0;
+}
 
 // static bool diagnostic(void)
 // {
@@ -58,13 +82,26 @@ static void print_sha256(const uint8_t *image_hash, const char *label)
 
 static void ota_example_task(void *pvParameter)
 {
-
+  EventBits_t uxBits;
   esp_err_t err;
 
   ESP_LOGI(TAG, "Starting OTA task");
   while (1)
   {
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    uxBits = xEventGroupWaitBits(
+        xCreatedEventGroup,
+        BIT_0,
+        pdTRUE,
+        pdFALSE,
+        portMAX_DELAY);
+    if ((uxBits & BIT_0) == BIT_0)
+    {
+      ESP_LOGI(TAG, "received OTA command");
+    }
+    else
+    {
+      ESP_LOGI(TAG, "received Strange command");
+    }
   }
 }
 
@@ -113,6 +150,22 @@ void init_ota_client()
         esp_ota_mark_app_invalid_rollback_and_reboot();
       }
     }
+  }
+
+  // Attempt to create the event group.
+  xCreatedEventGroup = xEventGroupCreate();
+
+  // Was the event group created successfully?
+  if (xCreatedEventGroup == NULL)
+  {
+    // The event group was not created because there was insufficient
+    // FreeRTOS heap available.
+    ESP_LOGE(TAG, "EventGroup creation failed");
+  }
+  else
+  {
+    // The event group was created.
+    ESP_LOGI(TAG, "EventGroup creation succeed");
   }
 
   xTaskCreate(&ota_example_task, "ota_task", 8192, NULL, 5, NULL);

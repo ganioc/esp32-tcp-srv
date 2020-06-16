@@ -11,6 +11,7 @@
 #include "./include/ctrltask.h"
 #include "../util/include/util.h"
 #include "../gpio/include/gpio.h"
+#include "../http/include/http.h"
 
 extern QueueManager_t xManager[];
 extern SemaphoreHandle_t xSemaphore;
@@ -148,6 +149,29 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
   {
     printf("getVersion()\n");
     encodeVersionRead(msg);
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_SET_UPGRADE)
+  {
+    printf("setUpgrade()\n");
+    printf("url: %s\n", &(msg->buf[3]));
+
+    uint8_t status = get_ota_status();
+    if (status == UPGRADE_STATUS_GOING || status == UPGRADE_STATUS_FINISHED_OK)
+    {
+      encodeSetUpgrade(msg, 1);
+    }
+    else
+    {
+      // send out to ota_client_task
+      set_ota_url(&(msg->buf[3]));
+      
+      encodeSetUpgrade(msg, 0);
+    }
+  }
+  else if (msg->buf[0] == CMD_REQUEST && msg->buf[1] == TARGET_ESP32 && msg->buf[2] == ESP32_GET_UPGRADE_STATUS)
+  {
+    printf("getUpgradeStatus()\n");
+    encodeGetUpgradeStatus(msg);
   }
   else
   {

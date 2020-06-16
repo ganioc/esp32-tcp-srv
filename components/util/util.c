@@ -169,6 +169,27 @@ int encodeESP32SetTimestamp(Msg_t *msg, int64_t tm)
   msg->len = index;
   return 0;
 }
+int encodeSetUpgrade(Msg_t *msg, uint8_t err)
+{
+  int i = 0;
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ESP32;
+  msg->buf[i++] = err;
+  msg->buf[i++] = ESP32_SET_UPGRADE;
+  msg->len = i;
+  return 0;
+}
+int encodeGetUpgradeStatus(Msg_t *msg)
+{
+  int i = 0;
+  msg->buf[i++] = CMD_RESPONSE;
+  msg->buf[i++] = TARGET_ESP32;
+  msg->buf[i++] = 0;
+  msg->buf[i++] = ESP32_GET_UPGRADE_STATUS;
+  msg->buf[i++] = get_ota_status();
+  msg->len = i;
+  return 0;
+}
 
 int encodeSwitchRead(Msg_t *msg, uint8_t switch_num, uint8_t err)
 {
