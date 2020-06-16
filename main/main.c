@@ -76,6 +76,8 @@ void app_main()
     // http server on
     init_http();
 
+    init_ota_client();
+
     //Initialize or reinitialize TWDT
     CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
 
