@@ -253,8 +253,8 @@ void upgrade()
       }
       else
       {
-        ESP_LOGI(TAG, "Prepare to restart system after 5 s!");
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        ESP_LOGI(TAG, "Prepare to restart system after 3 s!");
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
         esp_restart();
       }
     }

@@ -24,7 +24,9 @@ How to upgrading?
 ```
 1.0.2 - basic functions tested
       - 192.168.4.1 AP will bring a webpage to set new SSID, PASS
-
+0.2.0 - OTA from HTTP server added
+      PASS
+      
 ```
 
 
