@@ -158,6 +158,7 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     uint8_t status = get_ota_status();
     if (status == UPGRADE_STATUS_GOING || status == UPGRADE_STATUS_FINISHED_OK)
     {
+      printf("can not start upgrade()\n");
       encodeSetUpgrade(msg, 1);
     }
     else

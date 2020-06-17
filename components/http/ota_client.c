@@ -80,7 +80,12 @@ static void print_sha256(const uint8_t *image_hash, const char *label)
   }
   ESP_LOGI(TAG, "%s: %s", label, hash_print);
 }
-
+void upgrade()
+{
+  ESP_LOGI(TAG, "Start upgrade ...");
+  OTA_STATUS = UPGRADE_STATUS_GOING;
+  printf("url:%s\n", OTA_URL);
+}
 static void ota_example_task(void *pvParameter)
 {
   EventBits_t uxBits;
@@ -98,6 +103,7 @@ static void ota_example_task(void *pvParameter)
     if ((uxBits & BIT_0) == BIT_0)
     {
       ESP_LOGI(TAG, "received OTA command");
+      upgrade();
     }
     else
     {
