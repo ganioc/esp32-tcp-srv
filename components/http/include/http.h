@@ -9,3 +9,6 @@ int set_ota_url(char *p);
 uint8_t get_ota_status();
 
 int trigure_ota_event();
+
+// check if upgrading is going on
+int getIsUpgrading();

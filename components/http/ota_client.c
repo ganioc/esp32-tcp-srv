@@ -19,6 +19,7 @@
 
 #include "./include/http.h"
 #include "../util/include/util.h"
+#include "../gpio/include/gpio.h"
 
 #define BUFFSIZE 1024
 #define HASH_LEN 32 /* SHA-256 digest length */
@@ -32,6 +33,18 @@ static uint8_t OTA_STATUS = 0;
 
 // Declare a variable to hold the created event group.
 EventGroupHandle_t xCreatedEventGroup;
+
+int getIsUpgrading()
+{
+  if (OTA_STATUS == UPGRADE_STATUS_GOING)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
 
 int set_ota_url(char *p)
 {
@@ -91,6 +104,7 @@ void upgrade()
   const esp_partition_t *running = esp_ota_get_running_partition();
 
   ESP_LOGI(TAG, "Start upgrade ...");
+  off_led_stat();
   OTA_STATUS = UPGRADE_STATUS_GOING;
   printf("url:%s\n", OTA_URL);
 
@@ -143,7 +157,14 @@ void upgrade()
   while (1)
   {
     ESP_LOGI(TAG, "read from socket %d", BUFFSIZE);
+    if (binary_file_length % 8192 == 0)
+    {
+      on_led_stat();
+    }
     int data_read = esp_http_client_read(client, ota_write_data, BUFFSIZE);
+
+    off_led_stat();
+
     if (data_read < 0)
     {
       ESP_LOGE(TAG, "Error: SSL data read error");
@@ -213,6 +234,7 @@ void upgrade()
           break;
         }
       }
+
       err = esp_ota_write(update_handle, (const void *)ota_write_data, data_read);
       if (err != ESP_OK)
       {
@@ -259,7 +281,7 @@ void upgrade()
       }
     }
   }
-
+  off_led_stat();
   ESP_LOGI(TAG, "out of upgrade ...");
 }
 static void ota_example_task(void *pvParameter)

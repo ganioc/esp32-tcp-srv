@@ -107,6 +107,10 @@ void app_main()
             {
                 on_led_link();
             }
+            // if (getIsUpgrading())
+            // {
+            //     on_led_stat();
+            // }
         }
         else
         {
@@ -114,6 +118,10 @@ void app_main()
             {
                 off_led_link();
             }
+            // if (getIsUpgrading())
+            // {
+            //     off_led_stat();
+            // }
         }
 
         vTaskDelay(500 / portTICK_PERIOD_MS);

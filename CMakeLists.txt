@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # Change this, for version update
-set(PROJECT_VER "1.1.0")
+set(PROJECT_VER "1.1.10")
 
 # This example uses an extra component for common functions such as Wi-Fi and Ethernet connection.
 set(EXTRA_COMPONENT_DIRS $ENV{IDF_PATH}/examples/common_components/protocol_examples_common)
