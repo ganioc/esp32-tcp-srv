@@ -80,7 +80,7 @@ void app_main()
     init_ota_client();
 
     //Initialize or reinitialize TWDT
-    CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, true), ESP_OK);
+    CHECK_ERROR_CODE(esp_task_wdt_init(TWDT_TIMEOUT_S, false), ESP_OK);
 
     // turn on uart task
     printf("\ninit usart\n");

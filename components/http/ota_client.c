@@ -132,6 +132,7 @@ void upgrade()
   {
     esp_http_client_close(client);
     esp_http_client_cleanup(client);
+    ESP_LOGW(TAG, "update partion error");
     OTA_STATUS = UPGRADE_STATUS_NEXT_PARTITION_NULL;
     return;
   }
@@ -151,6 +152,7 @@ void upgrade()
     }
     else if (data_read > 0)
     {
+      ESP_LOGI(TAG, "dataread: %d", data_read);
       if (image_header_was_checked == false)
       {
         esp_app_desc_t new_app_info;
@@ -201,20 +203,22 @@ void upgrade()
           OTA_STATUS = UPGRADE_STATUS_ERROR_LENGTH_OVERLIMIT;
           break;
         }
-        binary_file_length += data_read;
-        ESP_LOGI(TAG, "Written image length %d", binary_file_length);
       }
-      else if (data_read == 0)
-      {
-        ESP_LOGI(TAG, "Connection closed,all data received");
-        OTA_STATUS = UPGRADE_STATUS_FINISHED_OK;
-        break;
-      }
+      binary_file_length += data_read;
+      ESP_LOGI(TAG, "Written image length %d", binary_file_length);
+    }
+    else if (data_read == 0)
+    {
+      ESP_LOGI(TAG, "Connection closed,all data received");
+      OTA_STATUS = UPGRADE_STATUS_FINISHED_OK;
+      break;
     }
   }
 
   esp_http_client_close(client);
   esp_http_client_cleanup(client);
+
+  ESP_LOGI(TAG, "out of upgrade ...");
 }
 static void ota_example_task(void *pvParameter)
 {
