@@ -55,6 +55,8 @@
 #define UPGRADE_STATUS_ERROR_OTA_END 0x16
 #define UPGRADE_STATUS_ERROR_SET_BOOT 0x17
 #define UPGRADE_STATUS_FINISHED_FAIL 0x18
+#define UPGRADE_STATUS_NEXT_PARTITION_NULL 0x19
+#define UPGRADE_STATUS_ERROR_INVALID_VERSION_SAME 0x1A
 
 #define CHECK_ERROR_CODE(returned, expected) ({ \
   if (returned != expected)                     \

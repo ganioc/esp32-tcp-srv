@@ -353,7 +353,7 @@ int check_crc(char *buf)
   // check len
   int len = (buf[3] << 8) | buf[4];
 
-  if (len < 2 || len > 24)
+  if (len < 2 || len > 56)
   {
     ESP_LOGI(TAG, "Rx invalid frame, len=%d", len);
     return -1;

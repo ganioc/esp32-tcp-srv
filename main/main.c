@@ -76,6 +76,7 @@ void app_main()
     // http server on
     init_http();
 
+    // ota client on
     init_ota_client();
 
     //Initialize or reinitialize TWDT

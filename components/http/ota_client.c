@@ -82,14 +82,143 @@ static void print_sha256(const uint8_t *image_hash, const char *label)
 }
 void upgrade()
 {
+  esp_err_t err;
+  /* update handle : set by esp_ota_begin(), must be freed via esp_ota_end() */
+  esp_ota_handle_t update_handle = 0;
+  const esp_partition_t *update_partition = NULL;
+
+  const esp_partition_t *configured = esp_ota_get_boot_partition();
+  const esp_partition_t *running = esp_ota_get_running_partition();
+
   ESP_LOGI(TAG, "Start upgrade ...");
   OTA_STATUS = UPGRADE_STATUS_GOING;
   printf("url:%s\n", OTA_URL);
+
+  if (configured != running)
+  {
+    ESP_LOGW(TAG, "Configured OTA boot partition at offset 0x%08x, but running from offset 0x%08x",
+             configured->address, running->address);
+    ESP_LOGW(TAG, "(This can happen if either the OTA boot data or preferred boot image become corrupted somehow.)");
+  }
+  ESP_LOGI(TAG, "Running partition type %d subtype %d (offset 0x%08x)",
+           running->type, running->subtype, running->address);
+
+  esp_http_client_config_t config = {
+      .url = OTA_URL};
+  // clear client in the end or met error
+  esp_http_client_handle_t client = esp_http_client_init(&config);
+  if (client == NULL)
+  {
+    ESP_LOGE(TAG, "Failed to initialise HTTP connection");
+    OTA_STATUS = UPGRADE_STATUS_ERROR_INIT_HTTP_CLIENT;
+    return;
+  }
+
+  err = esp_http_client_open(client, 0);
+  if (err != ESP_OK)
+  {
+    ESP_LOGE(TAG, "Failed to open HTTP connection: %s", esp_err_to_name(err));
+    esp_http_client_cleanup(client);
+    OTA_STATUS = UPGRADE_STATUS_ERROR_OPEN_CLIENT;
+    return;
+  }
+  esp_http_client_fetch_headers(client);
+
+  update_partition = esp_ota_get_next_update_partition(NULL);
+  ESP_LOGI(TAG, "Writing to partition subtype %d at offset 0x%x",
+           update_partition->subtype, update_partition->address);
+
+  if (update_partition == NULL)
+  {
+    esp_http_client_close(client);
+    esp_http_client_cleanup(client);
+    OTA_STATUS = UPGRADE_STATUS_NEXT_PARTITION_NULL;
+    return;
+  }
+
+  int binary_file_length = 0;
+  bool image_header_was_checked = false;
+
+  while (1)
+  {
+    ESP_LOGI(TAG, "read from socket %d", BUFFSIZE);
+    int data_read = esp_http_client_read(client, ota_write_data, BUFFSIZE);
+    if (data_read < 0)
+    {
+      ESP_LOGE(TAG, "Error: SSL data read error");
+      OTA_STATUS = UPGRADE_STATUS_ERROR_READ_CLIENT;
+      break;
+    }
+    else if (data_read > 0)
+    {
+      if (image_header_was_checked == false)
+      {
+        esp_app_desc_t new_app_info;
+        if (data_read > sizeof(esp_image_header_t) + sizeof(esp_image_segment_header_t) + sizeof(esp_app_desc_t))
+        {
+          // check current version with downloading
+          memcpy(&new_app_info, &ota_write_data[sizeof(esp_image_header_t) + sizeof(esp_image_segment_header_t)], sizeof(esp_app_desc_t));
+          ESP_LOGI(TAG, "New firmware version: %s", new_app_info.version);
+
+          esp_app_desc_t running_app_info;
+          if (esp_ota_get_partition_description(running, &running_app_info) == ESP_OK)
+          {
+            ESP_LOGI(TAG, "Running firmware version: %s", running_app_info.version);
+          }
+
+          const esp_partition_t *last_invalid_app = esp_ota_get_last_invalid_partition();
+          esp_app_desc_t invalid_app_info;
+
+          if (esp_ota_get_partition_description(last_invalid_app, &invalid_app_info) == ESP_OK)
+          {
+            ESP_LOGI(TAG, "Last invalid firmware version: %s", invalid_app_info.version);
+          }
+          // check current version with last invalid partition
+          if (last_invalid_app != NULL)
+          {
+            if (memcmp(invalid_app_info.version, new_app_info.version, sizeof(new_app_info.version)) == 0)
+            {
+              ESP_LOGW(TAG, "New version is the same as invalid version.");
+              ESP_LOGW(TAG, "Previously, there was an attempt to launch the firmware with %s version, but it failed.", invalid_app_info.version);
+              ESP_LOGW(TAG, "The firmware has been rolled back to the previous version.");
+              OTA_STATUS = UPGRADE_STATUS_ERROR_VERSION_SAME;
+              break;
+            }
+          }
+
+          if (memcmp(new_app_info.version, running_app_info.version, sizeof(new_app_info.version)) == 0)
+          {
+            ESP_LOGW(TAG, "Current running version is the same as a new. We will not continue the update.");
+            OTA_STATUS = UPGRADE_STATUS_ERROR_VERSION_SAME;
+            break;
+          }
+
+          image_header_was_checked = true;
+        }
+        else
+        {
+          ESP_LOGE(TAG, "received package is not fit len");
+          OTA_STATUS = UPGRADE_STATUS_ERROR_LENGTH_OVERLIMIT;
+          break;
+        }
+        binary_file_length += data_read;
+        ESP_LOGI(TAG, "Written image length %d", binary_file_length);
+      }
+      else if (data_read == 0)
+      {
+        ESP_LOGI(TAG, "Connection closed,all data received");
+        OTA_STATUS = UPGRADE_STATUS_FINISHED_OK;
+        break;
+      }
+    }
+  }
+
+  esp_http_client_close(client);
+  esp_http_client_cleanup(client);
 }
 static void ota_example_task(void *pvParameter)
 {
   EventBits_t uxBits;
-  esp_err_t err;
 
   ESP_LOGI(TAG, "Starting OTA task");
   while (1)
