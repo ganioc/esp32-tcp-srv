@@ -152,7 +152,7 @@ void upgrade()
     }
     else if (data_read > 0)
     {
-      ESP_LOGI(TAG, "dataread: %d", data_read);
+      ESP_LOGI(TAG, "data_read: %d", data_read);
       if (image_header_was_checked == false)
       {
         esp_app_desc_t new_app_info;
@@ -196,6 +196,15 @@ void upgrade()
           }
 
           image_header_was_checked = true;
+
+          err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &update_handle);
+          if (err != ESP_OK)
+          {
+            ESP_LOGE(TAG, "esp_ota_begin failed (%s)", esp_err_to_name(err));
+            OTA_STATUS = UPGRADE_STATUS_ERROR_OTA_BEGIN;
+            break;
+          }
+          ESP_LOGI(TAG, "esp_ota_begin succeeded");
         }
         else
         {
@@ -204,8 +213,15 @@ void upgrade()
           break;
         }
       }
+      err = esp_ota_write(update_handle, (const void *)ota_write_data, data_read);
+      if (err != ESP_OK)
+      {
+        ESP_LOGW(TAG, "Write image error");
+        OTA_STATUS = UPGRADE_STATUS_ERROR_WRITE_FLASH;
+        break;
+      }
       binary_file_length += data_read;
-      ESP_LOGI(TAG, "Written image length %d", binary_file_length);
+      ESP_LOGI(TAG, "Write image length %d", binary_file_length);
     }
     else if (data_read == 0)
     {
@@ -215,8 +231,34 @@ void upgrade()
     }
   }
 
+  ESP_LOGI(TAG, "Total Write binary data length : %d", binary_file_length);
+
   esp_http_client_close(client);
   esp_http_client_cleanup(client);
+
+  if (OTA_STATUS == UPGRADE_STATUS_FINISHED_OK)
+  {
+    if (esp_ota_end(update_handle) != ESP_OK)
+    {
+      ESP_LOGE(TAG, "esp_ota_end failed!");
+      OTA_STATUS = UPGRADE_STATUS_ERROR_OTA_END;
+    }
+    else
+    {
+      err = esp_ota_set_boot_partition(update_partition);
+      if (err != ESP_OK)
+      {
+        ESP_LOGE(TAG, "esp_ota_set_boot_partition failed (%s)!", esp_err_to_name(err));
+        OTA_STATUS = UPGRADE_STATUS_ERROR_SET_BOOT;
+      }
+      else
+      {
+        ESP_LOGI(TAG, "Prepare to restart system after 5 s!");
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        esp_restart();
+      }
+    }
+  }
 
   ESP_LOGI(TAG, "out of upgrade ...");
 }

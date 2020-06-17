@@ -57,6 +57,7 @@
 #define UPGRADE_STATUS_FINISHED_FAIL 0x18
 #define UPGRADE_STATUS_NEXT_PARTITION_NULL 0x19
 #define UPGRADE_STATUS_ERROR_INVALID_VERSION_SAME 0x1A
+#define UPGRADE_STATUS_ERROR_WRITE_FLASH 0x1B
 
 #define CHECK_ERROR_CODE(returned, expected) ({ \
   if (returned != expected)                     \
