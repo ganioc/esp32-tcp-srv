@@ -26,7 +26,7 @@ How to upgrading?
       - 192.168.4.1 AP will bring a webpage to set new SSID, PASS
 0.2.0 - OTA from HTTP server added
       PASS
-      
+1.1.0 - Test version with OTA 
 ```
 
 
