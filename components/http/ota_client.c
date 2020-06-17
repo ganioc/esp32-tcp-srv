@@ -46,6 +46,7 @@ uint8_t get_ota_status()
 
 int trigure_ota_event()
 {
+  ESP_LOGI(TAG, "trigure_ota_event");
   xEventGroupSetBits(xCreatedEventGroup, BIT_0);
   return 0;
 }

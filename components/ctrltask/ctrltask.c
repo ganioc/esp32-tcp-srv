@@ -164,7 +164,7 @@ void handle_msg(QueueHandle_t queue, Msg_t *msg)
     {
       // send out to ota_client_task
       set_ota_url(&(msg->buf[3]));
-      
+      trigure_ota_event();
       encodeSetUpgrade(msg, 0);
     }
   }
