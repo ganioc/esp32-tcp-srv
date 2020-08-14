@@ -1,14 +1,18 @@
 # esp32-sensors Example
-
 Starts a FreeRTOS task to print "esp32-sensors"
 
 See the README.md file in the upper level 'examples' directory for more information about examples.
+
+
+## SDK version
+- esp-idf  v4.0
 
 
 # Functions
 ## OTA
 How to upgrading?
 
+Use HTTP client to fetch new firmware from a HTTP server.
 
 ## GPIO settings
 
